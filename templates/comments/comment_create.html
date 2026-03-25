@@ -1,7 +1,11 @@
-<h2>Create Post</h2>
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Add Comment</h2>
 
 <form method="post">
   {% csrf_token %}
   {{ form.as_p }}
-  <button type="submit">Create Post</button>
+  <button type="submit">Post Comment</button>
 </form>
+{% endblock %}

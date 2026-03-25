@@ -1,0 +1,62 @@
+<body data-authenticated="{{ request.user.is_authenticated|yesno:'1,0' }}">
+
+{% include "includes/navbar.html" %}
+
+{% block content %}
+{% endblock %}
+
+<div id="live-notifications" style="position:fixed; right:20px; bottom:20px; max-width:320px;"></div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+	const isAuthenticated = document.body.dataset.authenticated === "1";
+	if (!isAuthenticated) return;
+
+	const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+	const countEl = document.getElementById("notif-count");
+
+	function syncUnreadCount() {
+		fetch("/notifications/unread-count/")
+			.then(function (response) { return response.json(); })
+			.then(function (data) {
+				if (countEl && typeof data.unread_count === "number") {
+					countEl.textContent = String(data.unread_count);
+				}
+			})
+			.catch(function () {});
+	}
+
+	function showToast(message) {
+		const box = document.getElementById("live-notifications");
+		if (!box || !message) return;
+		const item = document.createElement("div");
+		item.textContent = message;
+		item.style.cssText = "background:#111;color:#fff;padding:10px 12px;margin-top:8px;border-radius:6px;";
+		box.prepend(item);
+		setTimeout(function () { item.remove(); }, 5000);
+	}
+
+	function connectSocket() {
+		const socket = new WebSocket(wsScheme + "://" + window.location.host + "/ws/notifications/");
+
+		socket.onmessage = function (event) {
+			const data = JSON.parse(event.data);
+			if (countEl) {
+				const current = parseInt(countEl.textContent || "0", 10);
+				countEl.textContent = String(current + 1);
+			}
+			showToast(data.message);
+		};
+
+		socket.onclose = function () {
+			setTimeout(connectSocket, 2000);
+		};
+	}
+
+	connectSocket();
+	syncUnreadCount();
+	setInterval(syncUnreadCount, 20000);
+});
+</script>
+
+</body>

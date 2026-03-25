@@ -25,12 +25,13 @@ SECRET_KEY = 'django-insecure-v3w37g0hc(4aqmk99duflx1$sjqn@=snjh3a66+xs3*-gc6mpx
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -64,13 +65,14 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'blog.context_processors.notifications_badge',
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'BlogSystem2.wsgi.application'
-ASGI_APPLICATION = 'BlogSystem2.asgi.application'
+# WSGI_APPLICATION = 'BlogSystem2.wsgi.application'
+ASGI_APPLICATION = "BlogSystem2.asgi.application"
 
 
 # Database
@@ -127,3 +129,9 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
