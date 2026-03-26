@@ -61,6 +61,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
         response = super().form_valid(form)
 
         if form.instance.is_published:
+            print("is_published")
             users = User.objects.exclude(id=self.request.user.id)
             for user in users:
                 create_and_push_notification(
