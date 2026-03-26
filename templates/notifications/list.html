@@ -1,18 +1,104 @@
-{% extends "base.html" %}
+{#<h2>Notifications</h2>#}
+{##}
+{#<!-- NEW -->#}
+{#<h3>New Notifications</h3>#}
+{##}
+{#<a href="{% url 'blog:home' %}" style="display:inline-block; margin-bottom:10px;">Back#}
+{#    #}
+{#</a>#}
+{##}
+{#<form method="post" action="{% url 'blog:mark_all_read' %}">#}
+{#    {% csrf_token %}#}
+{#    <button type="submit">Mark All as Read</button>#}
+{#</form>#}
+{##}
+{##}
+{#{% if new_notifications %}#}
+{#    {% for n in new_notifications %}#}
+{#        <div style="border:1px solid green; padding:10px; margin:5px;">#}
+{#            <p>{{ n.message }}</p>#}
+{#            <small>{{ n.created_at }}</small>#}
+{##}
+{#            <form method="post" action="{% url 'blog:mark_read' n.id %}">#}
+{#                {% csrf_token %}#}
+{#                <button type="submit">Mark as Read</button>#}
+{#            </form>#}
+{#        </div>#}
+{#    {% endfor %}#}
+{#{% else %}#}
+{#    <p>No new notifications</p>#}
+{#{% endif %}#}
+{##}
+{##}
+{#<!-- OLD -->#}
+{#<h3>Old Notifications</h3>#}
+{#{% if old_notifications %}#}
+{#    {% for n in old_notifications %}#}
+{#        <div style="border:1px solid gray; padding:10px; margin:5px;">#}
+{#            <p>{{ n.message }}</p>#}
+{#            <small>{{ n.created_at }}</small>#}
+{#        </div>#}
+{#    {% endfor %}#}
+{#{% else %}#}
+{#    <p>No old notifications</p>#}
+{#{% endif %}#}
 
-{% block content %}
 
-<h2>Notifications</h2>
 
-<ul>
-    {% for n in notifications %}
-        <li style="{% if not n.is_read %}font-weight:bold{% endif %}">
-            {{ n.message }}
-            <small>{{ n.created_at }}</small>
-        </li>
-    {% empty %}
-        <li>No notifications</li>
+<h2 style="margin-bottom:10px;">Notifications</h2>
+
+<a href="{% url 'blog:home' %}" 
+   style="display:inline-block; margin-bottom:15px; text-decoration:none; color:#1877f2; font-weight:500;">
+   ← Back
+</a>
+
+<form method="post" action="{% url 'blog:mark_all_read' %}" style="margin-bottom:20px;">
+    {% csrf_token %}
+    <button type="submit" 
+        style="background:#1877f2; color:white; border:none; padding:8px 14px; border-radius:6px; cursor:pointer;">
+        Mark All as Read
+    </button>
+</form>
+
+
+<!-- NEW -->
+<h3 style="color:#1877f2;">New Notifications</h3>
+
+{% if new_notifications %}
+    {% for n in new_notifications %}
+        <div style="background:#e7f3ff; border-radius:10px; padding:12px; margin:8px 0; display:flex; justify-content:space-between; align-items:center;">
+            
+            <div>
+                <p style="margin:0; font-weight:500;">{{ n.message }}</p>
+                <small style="color:gray;">{{ n.created_at }}</small>
+            </div>
+
+            <form method="post" action="{% url 'blog:mark_read' n.id %}">
+                {% csrf_token %}
+                <button type="submit" 
+                    style="background:white; border:1px solid #1877f2; color:#1877f2; padding:6px 10px; border-radius:6px; cursor:pointer;">
+                    ✓
+                </button>
+            </form>
+
+        </div>
     {% endfor %}
-</ul>
+{% else %}
+    <p style="color:gray;">No new notifications</p>
+{% endif %}
 
-{% endblock %}
+
+
+<!-- OLD -->
+<h3 style="margin-top:25px; color:gray;">Earlier</h3>
+
+{% if old_notifications %}
+    {% for n in old_notifications %}
+        <div style="background:#f0f2f5; border-radius:10px; padding:12px; margin:8px 0;">
+            <p style="margin:0;">{{ n.message }}</p>
+            <small style="color:gray;">{{ n.created_at }}</small>
+        </div>
+    {% endfor %}
+{% else %}
+    <p style="color:gray;">No old notifications</p>
+{% endif %}

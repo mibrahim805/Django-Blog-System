@@ -113,14 +113,56 @@ class LikeView(LoginRequiredMixin,View):
         return redirect("blog:home")
 
 
+# @login_required
+# def notifications_list(request):
+#     notifications = Notification.objects.filter(user=request.user).order_by('-created_at')
+#     Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+#     return render(request, "notifications/list.html", {"notifications": notifications})
+
+
 @login_required
 def notifications_list(request):
-    notifications = Notification.objects.filter(user=request.user).order_by('-created_at')
-    Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
-    return render(request, "notifications/list.html", {"notifications": notifications})
+    new_notifications = Notification.objects.filter(user=request.user, is_read=False).order_by("-created_at")
+    old_notifications = Notification.objects.filter(user=request.user, is_read=True).order_by("-created_at")
+
+    return render(request, "notifications/list.html", {
+        "new_notifications": new_notifications,
+        "old_notifications": old_notifications
+    })
+
+
 
 
 @login_required
 def notifications_unread_count(request):
     unread_count = Notification.objects.filter(user=request.user, is_read=False).count()
     return JsonResponse({"unread_count": unread_count})
+
+
+# class MarkReadView(LoginRequiredMixin, View):
+#     model = Notification
+#     template_name = "notifications/list.html"
+#     success_url = reverse_lazy("blog:notifications_list")
+#     def post(self, request, *args, **kwargs):
+#         notification_id = kwargs.get("notification_id")
+#         notification = get_object_or_404(Notification, id=notification_id)
+#         notification.is_read = True
+#         notification.save()
+#         return redirect(self.success_url)
+#
+
+
+class MarkReadView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        notification_id = kwargs.get("notification_id")
+        notification = get_object_or_404(Notification, id=notification_id, user=request.user)
+        notification.is_read = True
+        notification.save()
+        return redirect("blog:notifications_list")
+
+
+class MarkAllReadView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+        return redirect("blog:notifications_list")
+
