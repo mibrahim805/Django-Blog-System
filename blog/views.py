@@ -56,7 +56,6 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     template_name = "post/post_create.html"
     success_url = reverse_lazy("blog:home")
 
-
     def form_valid(self, form):
         form.instance.author = self.request.user
         response = super().form_valid(form)
