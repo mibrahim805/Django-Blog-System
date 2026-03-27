@@ -64,12 +64,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
             print("is_published")
             users = User.objects.exclude(id=self.request.user.id)
             for user in users:
-                create_and_push_notification(
-                    user=user,
-                    post=form.instance,
-                    sender=self.request.user,
-                    message=f"{self.request.user.username} published a new post.",
-                )
+                create_and_push_notification(user=user,post=form.instance,sender=self.request.user,message=f"{self.request.user.username} published a new post.",)
         return response
 
 class CommentCreateView(LoginRequiredMixin, CreateView):
@@ -86,12 +81,7 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
 
         post = get_object_or_404(Post, id=post_id)
         if post.author != self.request.user:
-            create_and_push_notification(
-                user=post.author,
-                post=post,
-                sender=self.request.user,
-                message=f"{self.request.user.username} commented on your post.",
-            )
+            create_and_push_notification(user=post.author,post=post,sender=self.request.user,message=f"{self.request.user.username} commented on your post.",)
         return response
 
 
@@ -105,20 +95,8 @@ class LikeView(LoginRequiredMixin,View):
         else:
             Like.objects.create(user=request.user, post=post)
             if post.author != request.user:
-                create_and_push_notification(
-                    user=post.author,
-                    post=post,
-                    sender=request.user,
-                    message=f"{request.user.username} liked your post.",
-                )
+                create_and_push_notification(user=post.author,post=post,sender=request.user,message=f"{request.user.username} liked your post.",)
         return redirect("blog:home")
-
-
-# @login_required
-# def notifications_list(request):
-#     notifications = Notification.objects.filter(user=request.user).order_by('-created_at')
-#     Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
-#     return render(request, "notifications/list.html", {"notifications": notifications})
 
 
 @login_required
@@ -126,10 +104,7 @@ def notifications_list(request):
     new_notifications = Notification.objects.filter(user=request.user, is_read=False).order_by("-created_at")
     old_notifications = Notification.objects.filter(user=request.user, is_read=True).order_by("-created_at")
 
-    return render(request, "notifications/list.html", {
-        "new_notifications": new_notifications,
-        "old_notifications": old_notifications
-    })
+    return render(request, "notifications/list.html", {"new_notifications": new_notifications,"old_notifications": old_notifications,})
 
 
 
@@ -138,19 +113,6 @@ def notifications_list(request):
 def notifications_unread_count(request):
     unread_count = Notification.objects.filter(user=request.user, is_read=False).count()
     return JsonResponse({"unread_count": unread_count})
-
-
-# class MarkReadView(LoginRequiredMixin, View):
-#     model = Notification
-#     template_name = "notifications/list.html"
-#     success_url = reverse_lazy("blog:notifications_list")
-#     def post(self, request, *args, **kwargs):
-#         notification_id = kwargs.get("notification_id")
-#         notification = get_object_or_404(Notification, id=notification_id)
-#         notification.is_read = True
-#         notification.save()
-#         return redirect(self.success_url)
-#
 
 
 class MarkReadView(LoginRequiredMixin, View):
