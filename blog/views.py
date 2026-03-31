@@ -5,11 +5,11 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import CreateView, ListView
+from django.views.generic import CreateView, ListView, FormView
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
-from blog.forms import RegistrationForm, PostCreateForm, CommentForm
-from blog.models import Post, Notification, Comment, Like
+from blog.forms import RegistrationForm, PostCreateForm, CommentForm, InterestForm, CategoryCreateForm
+from blog.models import Post, Notification, Comment, Like, Profile, Category
 
 
 def create_and_push_notification(*, user, post, sender, message):
@@ -31,8 +31,15 @@ class UserRegisterView(CreateView):
     model = User
     form_class = RegistrationForm
     template_name = "registration/register.html"
-    success_url = reverse_lazy("blog:home")
+    success_url = reverse_lazy("blog:interests")
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+
+        # Create profile manually
+        Profile.objects.create(user=self.object)
+
+        return response
 
 class PostListView(LoginRequiredMixin, ListView):
     model = Post
@@ -41,7 +48,17 @@ class PostListView(LoginRequiredMixin, ListView):
     ordering = ["-created_at"]
 
     def get_queryset(self):
-        return Post.objects.select_related("author").filter(is_published=True)
+        user = self.request.user
+
+        profile, _ = Profile.objects.get_or_create(user=user)
+        interests = profile.interested_in.all()
+
+        queryset = Post.objects.select_related("author").filter(is_published=True)
+
+        if interests.exists():
+            queryset = queryset.filter(categories__in=interests).distinct()
+
+        return queryset.order_by("-created_at")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -129,3 +146,38 @@ class MarkAllReadView(LoginRequiredMixin, View):
         Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
         return redirect("blog:notifications_list")
 
+
+# class SelectInterestsView(FormView):
+#     template_name = "interest/select_interest.html"
+#     form_class = InterestForm
+#     success_url = reverse_lazy("blog:home")
+#
+#     def form_valid(self, form):
+#         interests = form.cleaned_data['interests']
+#
+#         profile = self.request.user.profile
+#         profile.interested_in.set(interests)
+#
+#         return super().form_valid(form)
+
+
+
+class SelectInterestsView(LoginRequiredMixin, FormView):
+    template_name = "interest/select_interest.html"
+    form_class = InterestForm
+    success_url = reverse_lazy("blog:home")
+
+    def form_valid(self, form):
+        interests = form.cleaned_data['interests']
+
+        profile, created = Profile.objects.get_or_create(user=self.request.user)
+        profile.interested_in.set(interests)
+
+        return super().form_valid(form)
+
+
+class CategoryCreateView(LoginRequiredMixin, CreateView):
+    model = Category
+    form_class = CategoryCreateForm
+    template_name = "category/category_create.html"
+    success_url = reverse_lazy("blog:home")

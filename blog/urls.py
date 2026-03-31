@@ -14,4 +14,5 @@ urlpatterns = [
     path('mark_read/<int:notification_id>/"', MarkReadView.as_view(), name='mark_read'),
     path('mark_all_read/', MarkAllReadView.as_view(), name='mark_all_read'),
     path('notifications/unread-count/', notifications_unread_count, name='notifications_unread_count'),
+    path('interests/,' , SelectInterestsView.as_view(), name='interests'),
 ]

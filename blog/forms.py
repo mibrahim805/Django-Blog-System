@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-from blog.models import Comment, Post
+from blog.models import Comment, Post, Category
 
 
 class RegistrationForm(UserCreationForm):
@@ -13,11 +13,20 @@ class RegistrationForm(UserCreationForm):
 class PostCreateForm(forms.ModelForm):
     class Meta:
         model=Post
-        fields=["title","content", "is_published"]
+        fields=["title","content", "is_published","category"]
 
 class CommentForm(forms.ModelForm):
     class Meta:
         model=Comment
         fields=["content"]
 
+class CategoryCreateForm(forms.ModelForm):
+    class Meta:
+        model=Category
+        fields=["name"]
 
+class InterestForm(forms.Form):
+    interests = forms.ModelMultipleChoiceField(
+        queryset=Category.objects.all(),
+        widget=forms.CheckboxSelectMultiple
+    )

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from blog.models import Post
+from blog.models import Post, Category
 
 
 # Register your models here.
@@ -9,3 +9,8 @@ from blog.models import Post
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
     list_display = ["title", "content"]
+
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ["name"]
