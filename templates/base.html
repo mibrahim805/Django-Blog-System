@@ -1,62 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>{% block title %}Blog System{% endblock %}</title>
+
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+	<!-- Google Fonts -->
+	<link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+	<style>
+		:root {
+			--primary-color: #667eea;
+			--secondary-color: #764ba2;
+			--light-bg: #f8f9fa;
+			--card-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+			--hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+		}
+
+		* {
+			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+		}
+
+		html, body {
+			height: 100%;
+		}
+
+		body {
+			background-color: var(--light-bg);
+			color: #2d3748;
+		}
+
+		main {
+			min-height: calc(100vh - 80px);
+			padding: 30px 0;
+		}
+
+		/* Live Notifications Styling */
+		#live-notifications {
+			position: fixed;
+			right: 20px;
+			bottom: 20px;
+			max-width: 380px;
+			z-index: 9999;
+		}
+
+		#live-notifications > div {
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			color: white;
+			padding: 14px 18px;
+			margin-top: 10px;
+			border-radius: 10px;
+			box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+			font-weight: 500;
+			font-size: 14px;
+			line-height: 1.5;
+			animation: slideInRight 0.3s ease-out;
+			word-wrap: break-word;
+			word-break: break-word;
+		}
+
+		@keyframes slideInRight {
+			from {
+				transform: translateX(400px);
+				opacity: 0;
+			}
+			to {
+				transform: translateX(0);
+				opacity: 1;
+			}
+		}
+
+		/* Footer Styling */
+		footer {
+			background: white;
+			border-top: 1px solid #e2e8f0;
+			padding: 30px 0;
+			margin-top: 60px;
+			box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.04);
+		}
+
+		footer p {
+			margin: 0;
+			color: #718096;
+			font-size: 14px;
+		}
+
+		/* Scroll bar styling */
+		::-webkit-scrollbar {
+			width: 8px;
+			height: 8px;
+		}
+
+		::-webkit-scrollbar-track {
+			background: #f1f1f1;
+		}
+
+		::-webkit-scrollbar-thumb {
+			background: var(--primary-color);
+			border-radius: 4px;
+		}
+
+		::-webkit-scrollbar-thumb:hover {
+			background: var(--secondary-color);
+		}
+
+		/* Responsive adjustments */
+		@media (max-width: 768px) {
+			main {
+				padding: 20px 0;
+			}
+
+			#live-notifications {
+				max-width: 90vw;
+				right: 10px;
+				left: 10px;
+			}
+
+			#live-notifications > div {
+				padding: 12px 14px;
+				font-size: 13px;
+				margin-top: 8px;
+			}
+		}
+	</style>
+
+	{% block extra_css %}{% endblock %}
+</head>
 <body data-authenticated="{{ request.user.is_authenticated|yesno:'1,0' }}">
 
-{% include "includes/navbar.html" %}
+	<!-- Navigation Bar -->
+	{% include "includes/navbar.html" %}
 
-{% block content %}
-{% endblock %}
+	<!-- Main Content -->
+	<main>
+		{% block content %}{% endblock %}
+	</main>
 
-<div id="live-notifications" style="position:fixed; right:20px; bottom:20px; max-width:320px;"></div>
+	<!-- Live Notifications Container -->
+	<div id="live-notifications"></div>
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-	const isAuthenticated = document.body.dataset.authenticated === "1";
-	if (!isAuthenticated) return;
+	<!-- Footer -->
+	<footer>
+		<div class="container">
+			<div class="row">
+				<div class="col-md-6">
+					<p><strong>Blog System</strong> © 2026. All rights reserved.</p>
+				</div>
+				<div class="col-md-6 text-md-end">
+					<p>Made with ❤️ for sharing great ideas</p>
+				</div>
+			</div>
+		</div>
+	</footer>
 
-	const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
-	const countEl = document.getElementById("notif-count");
+	<!-- Bootstrap JS -->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-	function syncUnreadCount() {
-		fetch("/notifications/unread-count/")
-			.then(function (response) { return response.json(); })
-			.then(function (data) {
-				if (countEl && typeof data.unread_count === "number") {
-					countEl.textContent = String(data.unread_count);
-				}
-			})
-			.catch(function () {});
-	}
+	<!-- Notifications Script -->
+	<script>
+		document.addEventListener("DOMContentLoaded", function () {
+			const isAuthenticated = document.body.dataset.authenticated === "1";
+			if (!isAuthenticated) return;
 
-	function showToast(message) {
-		const box = document.getElementById("live-notifications");
-		if (!box || !message) return;
-		const item = document.createElement("div");
-		item.textContent = message;
-		item.style.cssText = "background:#111;color:#fff;padding:10px 12px;margin-top:8px;border-radius:6px;";
-		box.prepend(item);
-		setTimeout(function () { item.remove(); }, 5000);
-	}
+			const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+			const countEl = document.getElementById("notif-count");
 
-	function connectSocket() {
-		const socket = new WebSocket(wsScheme + "://" + window.location.host + "/ws/notifications/");
-
-		socket.onmessage = function (event) {
-			const data = JSON.parse(event.data);
-			if (countEl) {
-				const current = parseInt(countEl.textContent || "0", 10);
-				countEl.textContent = String(current + 1);
+			function syncUnreadCount() {
+				fetch("/notifications/unread-count/")
+					.then(function (response) { return response.json(); })
+					.then(function (data) {
+						if (countEl && typeof data.unread_count === "number") {
+							countEl.textContent = String(data.unread_count);
+						}
+					})
+					.catch(function () {});
 			}
-			showToast(data.message);
-		};
 
-		socket.onclose = function () {
-			setTimeout(connectSocket, 2000);
-		};
-	}
+			function showToast(message) {
+				const box = document.getElementById("live-notifications");
+				if (!box || !message) return;
+				const item = document.createElement("div");
+				item.textContent = message;
+				box.prepend(item);
+				setTimeout(function () { item.remove(); }, 5000);
+			}
 
-	connectSocket();
-	syncUnreadCount();
-	setInterval(syncUnreadCount, 20000);
-});
-</script>
+			function connectSocket() {
+				const socket = new WebSocket(wsScheme + "://" + window.location.host + "/ws/notifications/");
+
+				socket.onmessage = function (event) {
+					const data = JSON.parse(event.data);
+					if (countEl) {
+						const current = parseInt(countEl.textContent || "0", 10);
+						countEl.textContent = String(current + 1);
+					}
+					showToast(data.message);
+				};
+
+				socket.onclose = function () {
+					setTimeout(connectSocket, 2000);
+				};
+			}
+
+			connectSocket();
+			syncUnreadCount();
+			setInterval(syncUnreadCount, 20000);
+		});
+	</script>
+
+	{% block extra_js %}{% endblock %}
 
 </body>
+</html>

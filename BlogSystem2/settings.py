@@ -116,6 +116,8 @@ USE_I18N = True
 
 USE_TZ = True
 
+AUTH_USER_MODEL = 'blog.CustomUser'
+
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL= '/post_list/'
 

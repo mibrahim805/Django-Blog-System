@@ -16,19 +16,6 @@ from blog.forms import RegistrationForm, PostCreateForm, CommentForm, InterestFo
 from blog.models import Post, Notification, Comment, Like, Profile, Category
 
 
-def create_and_push_notification(*, user, post, sender, message):
-    notification = Notification.objects.create(user=user, post=post, sender=sender, message=message)
-    channel_layer = get_channel_layer()
-
-    async_to_sync(channel_layer.group_send)(
-        f"user_{user.id}",
-        {
-            "type": "send_notification",
-            "message": message,
-            "notification_id": notification.id,
-        }
-    )
-    return notification
 
 
 class UserRegisterView(CreateView):
@@ -49,6 +36,7 @@ class PostListView(LoginRequiredMixin, ListView):
     template_name = "post/post_list.html"
     context_object_name = "posts"
     ordering = ["-created_at"]
+
 
     def get_queryset(self):
         user = self.request.user

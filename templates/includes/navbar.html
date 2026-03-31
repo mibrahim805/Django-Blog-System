@@ -1,7 +1,317 @@
-<nav>
-    <a href="/">Home</a>
+{#<nav>#}
+{#    <a href="/">Home</a>#}
+{##}
+{#    <a href="/notifications/">#}
+{#        🔔 Notifications (<span id="notif-count">{{ unread_notifications_count }}</span>)#}
+{#    </a>#}
+{#</nav>#}
 
-    <a href="/notifications/">
-        🔔 Notifications (<span id="notif-count">{{ unread_notifications_count }}</span>)
-    </a>
+
+<nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container">
+        <!-- Brand/Logo -->
+        <a class="navbar-brand" href="{% url 'blog:home' %}">
+            <span class="brand-icon">📝</span>
+            <strong>Blog System</strong>
+        </a>
+
+        <!-- Mobile Toggle Button -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Navbar Content -->
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <!-- Left Links -->
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'blog:home' %}">
+                        🏠 Home
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Right Links -->
+            <ul class="navbar-nav ms-auto">
+                {% if user.is_authenticated %}
+                    <!-- Create Post Button -->
+                    <li class="nav-item me-2">
+                        <a class="nav-link btn-create-post" href="{% url 'blog:create_post' %}">
+                            ➕ Create Post
+                        </a>
+                    </li>
+
+                    <!-- Notifications -->
+                    <li class="nav-item me-2">
+                        <a class="nav-link notifications-link" href="{% url 'blog:notifications_list' %}">
+                            <span class="notification-icon">🔔</span>
+                            <span class="notification-badge" id="notif-count">{{ unread_notifications_count }}</span>
+                        </a>
+                    </li>
+
+                    <!-- My Posts -->
+                    <li class="nav-item me-2">
+                        <a class="nav-link" href="{% url 'blog:my_posts' %}">
+                            📄 My Posts
+                        </a>
+                    </li>
+
+                    <!-- User Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle user-dropdown" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="user-avatar">{{ user.username|first|upper }}</span>
+                            {{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li>
+                                <a class="dropdown-item" href="#">
+                                    👤 Profile
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'blog:interests' %}">
+                                    ⭐ My Interests
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item logout-link" href="{% url 'logout' %}">
+                                    🚪 Logout
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <!-- Login & Register for Unauthenticated Users -->
+                    <li class="nav-item me-2">
+                        <a class="nav-link btn-login" href="{% url 'blog:login' %}">
+                            🔐 Login
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn-register" href="{% url 'blog:register' %}">
+                            📝 Register
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
 </nav>
+
+<style>
+    /* Navbar Styling */
+    .navbar {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+        padding: 12px 0;
+    }
+
+    .navbar-brand {
+        font-size: 20px;
+        font-weight: 700;
+        color: white !important;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .navbar-brand:hover {
+        transform: translateY(-2px);
+    }
+
+    .brand-icon {
+        font-size: 24px;
+    }
+
+    /* Navbar Links */
+    .navbar-nav .nav-link {
+        color: rgba(255, 255, 255, 0.9) !important;
+        font-weight: 500;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        padding: 8px 14px !important;
+        border-radius: 8px;
+        margin: 0 4px;
+    }
+
+    .navbar-nav .nav-link:hover {
+        color: white !important;
+        background-color: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+    }
+
+    /* Create Post Button */
+    .btn-create-post {
+        background-color: #ffc107 !important;
+        color: #2d3748 !important;
+        font-weight: 600 !important;
+        border-radius: 8px !important;
+        padding: 10px 16px !important;
+        transition: all 0.3s ease;
+    }
+
+    .btn-create-post:hover {
+        background-color: #ffb300 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+    }
+
+    /* Notifications Link */
+    .notifications-link {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .notification-icon {
+        font-size: 18px;
+    }
+
+    .notification-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #ff6b6b;
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        position: absolute;
+        top: -8px;
+        right: -8px;
+    }
+
+    /* User Dropdown */
+    .user-dropdown {
+        display: flex;
+        align-items: center;
+        gap: 10px !important;
+    }
+
+    .user-avatar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background-color: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        font-weight: 700;
+        font-size: 14px;
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .dropdown-menu {
+        background-color: #f8f9fa;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        margin-top: 8px;
+        padding: 8px 0;
+    }
+
+    .dropdown-item {
+        padding: 10px 16px;
+        font-weight: 500;
+        color: #2d3748;
+        transition: all 0.3s ease;
+    }
+
+    .dropdown-item:hover {
+        background-color: #e2e8f0;
+        color: #667eea;
+    }
+
+    .logout-link {
+        color: #dc3545;
+    }
+
+    .logout-link:hover {
+        background-color: #ffe0e0;
+        color: #c82333;
+    }
+
+    /* Login & Register Buttons -->
+    .btn-login {
+        background-color: rgba(255, 255, 255, 0.2) !important;
+        border: 1px solid white !important;
+        color: white !important;
+        border-radius: 8px !important;
+        padding: 10px 16px !important;
+        font-weight: 600 !important;
+        transition: all 0.3s ease;
+    }
+
+    .btn-login:hover {
+        background-color: rgba(255, 255, 255, 0.3) !important;
+        color: white !important;
+    }
+
+    .btn-register {
+        background-color: #ffc107 !important;
+        color: #2d3748 !important;
+        border-radius: 8px !important;
+        padding: 10px 16px !important;
+        font-weight: 600 !important;
+        transition: all 0.3s ease;
+    }
+
+    .btn-register:hover {
+        background-color: #ffb300 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 991px) {
+        .navbar {
+            padding: 10px 0;
+        }
+
+        .navbar-nav .nav-link {
+            padding: 10px 8px !important;
+        }
+
+        .notification-badge {
+            top: 0;
+            right: 0;
+        }
+
+        .navbar-collapse {
+            margin-top: 12px;
+        }
+
+        .navbar-nav {
+            gap: 8px;
+        }
+
+        .btn-create-post,
+        .btn-login,
+        .btn-register {
+            width: 100%;
+            text-align: center;
+            margin-top: 8px;
+        }
+    }
+
+    /* Navbar Toggler */
+    .navbar-toggler {
+        border: none;
+        background-color: rgba(255, 255, 255, 0.2);
+        padding: 6px 12px;
+    }
+
+    .navbar-toggler:focus {
+        box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.3);
+    }
+
+    .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.9%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
+</style>

@@ -56,84 +56,478 @@
 {#{% endfor %}#}
 {##}
 {#{% endblock %}#}
-
+{##}
+{##}
+{#{% extends "base.html" %}#}
+{##}
+{#{% block content %}#}
+{##}
+{#<h1 style="margin-bottom:15px;">My Posts</h1>#}
+{##}
+{#<a href="{% url 'blog:create_post' %}" #}
+{#   style="display:inline-block; margin-bottom:20px; padding:10px 14px; background:#0943f0; color:#f7f8fa; text-decoration:none; border-radius:6px;">#}
+{#    + Create Post#}
+{#</a>#}
+{##}
+{#{% for post in posts %}#}
+{#  <div style="background:#fff; border-radius:12px; padding:15px; margin-bottom:15px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">#}
+{##}
+{#    <!-- Header -->#}
+{#    <div style="margin-bottom:10px;">#}
+{#        <strong style="font-size:16px;">{{ post.author.username }}</strong><br>#}
+{#        <small style="color:gray;">{{ post.created_at }}</small>#}
+{#    </div>#}
+{##}
+{#    <!-- Content -->#}
+{#    <h3 style="margin:8px 0;">{{ post.title }}</h3>#}
+{#    <p style="margin-bottom:10px;">{{ post.content|truncatewords:30 }}</p>#}
+{##}
+{#    <!-- Stats -->#}
+{#    <div style="color:gray; font-size:14px; margin-bottom:10px;">#}
+{#        👍 {{ post.like_set.count }} &nbsp; | &nbsp; 💬 {{ post.comments.count }}#}
+{#    </div>#}
+{##}
+{#    <!-- Actions -->#}
+{#    <div style="display:flex; gap:10px; flex-wrap:wrap;">#}
+{##}
+{#        <!-- Comment -->#}
+{#        <a href="{% url 'blog:create_comment' post.id %}" #}
+{#           style="text-decoration:none; background:#e4e6eb; padding:6px 12px; border-radius:6px;">#}
+{#           💬 Comment#}
+{#        </a>#}
+{##}
+{#        <!-- Only show for author -->#}
+{#        {% if request.user == post.author %}#}
+{##}
+{#            <!-- Update -->#}
+{#            <a href="{% url 'blog:update_post' post.id %}" #}
+{#               style="text-decoration:none; background:#ffc107; padding:6px 12px; border-radius:6px;">#}
+{#               ✏️ Edit#}
+{#            </a>#}
+{##}
+{#            <!-- Delete -->#}
+{#            <a href="{% url 'blog:delete_post' post.id %}" #}
+{#               style="text-decoration:none; background:#dc3545; color:white; padding:6px 12px; border-radius:6px;"#}
+{#               onclick="return confirm('Are you sure you want to delete this post?');">#}
+{#               🗑 Delete#}
+{#            </a>#}
+{##}
+{#        {% endif %}#}
+{##}
+{#    </div>#}
+{##}
+{#    <!-- Comments -->#}
+{#    {% if post.comments.all %}#}
+{#      <div style="margin-top:10px; padding-top:10px; border-top:1px solid #eee;">#}
+{#        <strong style="font-size:14px;">Recent comments</strong>#}
+{##}
+{#        {% for comment in post.comments.all|slice:":3" %}#}
+{#          <div style="background:#f0f2f5; padding:8px; border-radius:8px; margin-top:6px;">#}
+{#            <strong>{{ comment.user.username }}</strong>#}
+{#            <p style="margin:4px 0;">{{ comment.content }}</p>#}
+{#          </div>#}
+{#        {% endfor %}#}
+{#      </div>#}
+{#    {% endif %}#}
+{##}
+{#  </div>#}
+{##}
+{#{% empty %}#}
+{#  <p>No posts found.</p>#}
+{#{% endfor %}#}
+{##}
+{#{% endblock %}#}
 
 {% extends "base.html" %}
 
 {% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<style>
+    :root {
+        --primary-color: #667eea;
+        --secondary-color: #764ba2;
+        --success-color: #10b981;
+        --warning-color: #f59e0b;
+        --danger-color: #dc3545;
+        --light-bg: #f8f9fa;
+        --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        --hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
 
-<h1 style="margin-bottom:15px;">My Posts</h1>
+    body {
+        background-color: var(--light-bg);
+    }
 
-<a href="{% url 'blog:create_post' %}" 
-   style="display:inline-block; margin-bottom:20px; padding:10px 14px; background:#0943f0; color:#f7f8fa; text-decoration:none; border-radius:6px;">
-    + Create Post
-</a>
+    .my-posts-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
 
-{% for post in posts %}
-  <div style="background:#fff; border-radius:12px; padding:15px; margin-bottom:15px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 40px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #e9ecef;
+    }
 
-    <!-- Header -->
-    <div style="margin-bottom:10px;">
-        <strong style="font-size:16px;">{{ post.author.username }}</strong><br>
-        <small style="color:gray;">{{ post.created_at }}</small>
-    </div>
+    .page-header h1 {
+        font-size: 32px;
+        font-weight: 700;
+        color: #2d3748;
+        margin: 0;
+    }
 
-    <!-- Content -->
-    <h3 style="margin:8px 0;">{{ post.title }}</h3>
-    <p style="margin-bottom:10px;">{{ post.content|truncatewords:30 }}</p>
+    .btn-create {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
 
-    <!-- Stats -->
-    <div style="color:gray; font-size:14px; margin-bottom:10px;">
-        👍 {{ post.like_set.count }} &nbsp; | &nbsp; 💬 {{ post.comments.count }}
-    </div>
+    .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
 
-    <!-- Actions -->
-    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+    .post-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: var(--card-shadow);
+        transition: all 0.3s ease;
+    }
 
-        <!-- Comment -->
-        <a href="{% url 'blog:create_comment' post.id %}" 
-           style="text-decoration:none; background:#e4e6eb; padding:6px 12px; border-radius:6px;">
-           💬 Comment
+    .post-card:hover {
+        box-shadow: var(--hover-shadow);
+        transform: translateY(-4px);
+    }
+
+    .post-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .post-author-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+
+    .post-author-details strong {
+        display: block;
+        font-size: 15px;
+        color: #2d3748;
+        margin-bottom: 2px;
+    }
+
+    .post-author-details small {
+        color: #718096;
+        font-size: 12px;
+    }
+
+    .post-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #2d3748;
+        margin: 16px 0 12px 0;
+        line-height: 1.4;
+    }
+
+    .post-content {
+        color: #4a5568;
+        font-size: 15px;
+        line-height: 1.6;
+        margin-bottom: 16px;
+    }
+
+    .post-stats {
+        display: flex;
+        gap: 20px;
+        color: #718096;
+        font-size: 14px;
+        padding: 12px 0;
+        border-top: 1px solid #e2e8f0;
+        border-bottom: 1px solid #e2e8f0;
+        margin: 16px 0;
+    }
+
+    .post-stat-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .post-stat-item strong {
+        color: #2d3748;
+    }
+
+    .post-actions {
+        display: flex;
+        gap: 10px;
+        margin: 16px 0;
+        flex-wrap: wrap;
+    }
+
+    .post-action-btn {
+        padding: 10px 14px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        text-decoration: none;
+    }
+
+    .btn-comment {
+        background-color: #e2e8f0;
+        color: #4a5568;
+    }
+
+    .btn-comment:hover {
+        background-color: #cbd5e0;
+        transform: translateY(-2px);
+    }
+
+    .btn-edit {
+        background-color: var(--warning-color);
+        color: white;
+    }
+
+    .btn-edit:hover {
+        background-color: #e59e00;
+        transform: translateY(-2px);
+    }
+
+    .btn-delete {
+        background-color: var(--danger-color);
+        color: white;
+    }
+
+    .btn-delete:hover {
+        background-color: #c82333;
+        transform: translateY(-2px);
+    }
+
+    .comments-section {
+        margin-top: 20px;
+        padding-top: 16px;
+        border-top: 2px solid #e2e8f0;
+    }
+
+    .comments-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .comment-item {
+        background-color: #f7fafc;
+        padding: 12px 14px;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        border-left: 3px solid var(--primary-color);
+    }
+
+    .comment-author {
+        font-weight: 600;
+        color: #2d3748;
+        font-size: 13px;
+        margin-bottom: 4px;
+    }
+
+    .comment-text {
+        color: #4a5568;
+        font-size: 13px;
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: var(--card-shadow);
+        color: #718096;
+    }
+
+    .empty-state-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+    }
+
+    .empty-state p {
+        font-size: 18px;
+        margin: 0;
+    }
+
+    .post-badge {
+        display: inline-block;
+        background-color: var(--primary-color);
+        color: white;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        margin-left: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .post-badge.published {
+        background-color: var(--success-color);
+    }
+
+    .post-badge.draft {
+        background-color: #6b7280;
+    }
+
+    @media (max-width: 600px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .page-header h1 {
+            font-size: 24px;
+        }
+
+        .btn-create {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .post-title {
+            font-size: 18px;
+        }
+
+        .post-actions {
+            gap: 8px;
+        }
+
+        .post-action-btn {
+            flex: 1;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="my-posts-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>📄 My Posts</h1>
+        <a href="{% url 'blog:create_post' %}" class="btn-create">
+            ➕ Create Post
         </a>
-
-        <!-- Only show for author -->
-        {% if request.user == post.author %}
-
-            <!-- Update -->
-            <a href="{% url 'blog:update_post' post.id %}" 
-               style="text-decoration:none; background:#ffc107; padding:6px 12px; border-radius:6px;">
-               ✏️ Edit
-            </a>
-
-            <!-- Delete -->
-            <a href="{% url 'blog:delete_post' post.id %}" 
-               style="text-decoration:none; background:#dc3545; color:white; padding:6px 12px; border-radius:6px;"
-               onclick="return confirm('Are you sure you want to delete this post?');">
-               🗑 Delete
-            </a>
-
-        {% endif %}
-
     </div>
 
-    <!-- Comments -->
-    {% if post.comments.all %}
-      <div style="margin-top:10px; padding-top:10px; border-top:1px solid #eee;">
-        <strong style="font-size:14px;">Recent comments</strong>
+    <!-- Posts List -->
+    {% for post in posts %}
+        <div class="post-card">
+            <!-- Post Header with Author -->
+            <div class="post-header">
+                <div class="post-author-avatar">
+                    {{ post.author.username|first|upper }}
+                </div>
+                <div class="post-author-details">
+                    <strong>{{ post.author.username }}</strong>
+                    <small>{{ post.created_at|date:"M d, Y" }}</small>
+                </div>
+                {% if post.is_published %}
+                    <span class="post-badge published">Published</span>
+                {% else %}
+                    <span class="post-badge draft">Draft</span>
+                {% endif %}
+            </div>
 
-        {% for comment in post.comments.all|slice:":3" %}
-          <div style="background:#f0f2f5; padding:8px; border-radius:8px; margin-top:6px;">
-            <strong>{{ comment.user.username }}</strong>
-            <p style="margin:4px 0;">{{ comment.content }}</p>
-          </div>
-        {% endfor %}
-      </div>
-    {% endif %}
+            <!-- Post Content -->
+            <h3 class="post-title">{{ post.title }}</h3>
+            <p class="post-content">{{ post.content }}</p>
 
-  </div>
+            <!-- Post Stats -->
+            <div class="post-stats">
+                <div class="post-stat-item">
+                    <span>👍</span>
+                    <span><strong>{{ post.like_set.count }}</strong> {{ post.like_set.count|pluralize:"Like,Likes" }}</span>
+                </div>
+                <div class="post-stat-item">
+                    <span>💬</span>
+                    <span><strong>{{ post.comments.count }}</strong> {{ post.comments.count|pluralize:"Comment,Comments" }}</span>
+                </div>
+            </div>
 
-{% empty %}
-  <p>No posts found.</p>
-{% endfor %}
+            <!-- Post Actions -->
+            <div class="post-actions">
+                <a href="{% url 'blog:create_comment' post.id %}" class="post-action-btn btn-comment">
+                    💬 Comment
+                </a>
 
+                <!-- Only show for author -->
+                {% if request.user == post.author %}
+                    <a href="{% url 'blog:update_post' post.id %}" class="post-action-btn btn-edit">
+                        ✏️ Edit
+                    </a>
+
+                    <a href="{% url 'blog:delete_post' post.id %}" 
+                       class="post-action-btn btn-delete"
+                       onclick="return confirm('🗑️ Are you sure you want to delete this post? This action cannot be undone.');">
+                        🗑️ Delete
+                    </a>
+                {% endif %}
+            </div>
+
+            <!-- Comments Section -->
+            {% if post.comments.all %}
+                <div class="comments-section">
+                    <div class="comments-title">Recent Comments</div>
+                    {% for comment in post.comments.all|slice:":3" %}
+                        <div class="comment-item">
+                            <div class="comment-author">{{ comment.user.username }}</div>
+                            <p class="comment-text">{{ comment.content }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    {% empty %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📝</div>
+            <p>No posts yet! Start creating your first post.</p>
+        </div>
+    {% endfor %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 {% endblock %}

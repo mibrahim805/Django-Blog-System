@@ -1,57 +1,331 @@
-<h2 style="margin-bottom:10px;">Notifications</h2>
+{% extends "base.html" %}
 
-<a href="{% url 'blog:home' %}" 
-   style="display:inline-block; margin-bottom:15px; text-decoration:none; color:#1877f2; font-weight:500;">
-   ← Back
-</a>
+{% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<style>
+    :root {
+        --primary-color: #667eea;
+        --secondary-color: #764ba2;
+        --success-color: #10b981;
+        --warning-color: #f59e0b;
+        --light-bg: #f8f9fa;
+        --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        --hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
 
-<form method="post" action="{% url 'blog:mark_all_read' %}" style="margin-bottom:20px;">
-    {% csrf_token %}
-    <button type="submit" 
-        style="background:#1877f2; color:white; border:none; padding:8px 14px; border-radius:6px; cursor:pointer;">
-        Mark All as Read
-    </button>
-</form>
+    body {
+        background-color: var(--light-bg);
+    }
 
+    .notifications-container {
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 20px;
+    }
 
-<!-- NEW -->
-<h3 style="color:#1877f2;">New Notifications</h3>
+    .page-header {
+        margin-bottom: 40px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #e9ecef;
+    }
 
-{% if new_notifications %}
-    {% for n in new_notifications %}
-        <div style="background:#e7f3ff; border-radius:10px; padding:12px; margin:8px 0; display:flex; justify-content:space-between; align-items:center;">
-            
-            <div>
-                <p style="margin:0; font-weight:500;">{{ n.message }}</p>
-                <small style="color:gray;">{{ n.created_at }}</small>
-            </div>
+    .page-header h1 {
+        font-size: 32px;
+        font-weight: 700;
+        color: #2d3748;
+        margin: 0 0 16px 0;
+    }
 
-            <form method="post" action="{% url 'blog:mark_read' n.id %}">
+    .header-actions {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        color: var(--primary-color);
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-back:hover {
+        color: var(--secondary-color);
+        transform: translateX(-2px);
+    }
+
+    .btn-mark-all {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-mark-all:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    .section-divider {
+        margin-top: 40px;
+        margin-bottom: 24px;
+    }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #2d3748;
+        margin: 0;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .section-title.new {
+        color: var(--primary-color);
+    }
+
+    .section-title.old {
+        color: #718096;
+    }
+
+    .notification-item {
+        background: white;
+        border-radius: 12px;
+        padding: 16px;
+        margin: 12px 0;
+        box-shadow: var(--card-shadow);
+        transition: all 0.3s ease;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .notification-item:hover {
+        box-shadow: var(--hover-shadow);
+        transform: translateY(-2px);
+    }
+
+    .notification-item.new {
+        background: linear-gradient(135deg, #f0f4ff 0%, #f7f4ff 100%);
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .notification-item.old {
+        border-left: 4px solid #cbd5e0;
+    }
+
+    .notification-icon {
+        font-size: 24px;
+        flex-shrink: 0;
+    }
+
+    .notification-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .notification-message {
+        margin: 0;
+        font-weight: 500;
+        color: #2d3748;
+        font-size: 15px;
+        line-height: 1.5;
+        word-wrap: break-word;
+        word-break: break-word;
+    }
+
+    .notification-time {
+        color: #718096;
+        font-size: 12px;
+        margin-top: 6px;
+    }
+
+    .notification-actions {
+        flex-shrink: 0;
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn-mark-read {
+        background-color: white;
+        border: 1px solid var(--primary-color);
+        color: var(--primary-color);
+        padding: 8px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .btn-mark-read:hover {
+        background-color: var(--primary-color);
+        color: white;
+        transform: scale(1.05);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: var(--card-shadow);
+    }
+
+    .empty-state-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+    }
+
+    .empty-state-text {
+        color: #718096;
+        font-size: 16px;
+        margin: 0;
+    }
+
+    .notification-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 12px;
+        padding: 4px 8px;
+        font-size: 11px;
+        font-weight: 700;
+        margin-left: 8px;
+    }
+
+    @media (max-width: 600px) {
+        .notifications-container {
+            padding: 12px;
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+        }
+
+        .page-header h1 {
+            font-size: 24px;
+        }
+
+        .header-actions {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .btn-mark-all {
+            width: 100%;
+        }
+
+        .notification-item {
+            flex-direction: column;
+        }
+
+        .notification-actions {
+            width: 100%;
+        }
+
+        .btn-mark-read {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="notifications-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>🔔 Notifications</h1>
+        <div class="header-actions">
+            <a href="{% url 'blog:home' %}" class="btn-back">← Back to Home</a>
+            <form method="post" action="{% url 'blog:mark_all_read' %}" style="margin: 0;">
                 {% csrf_token %}
-                <button type="submit" 
-                    style="background:white; border:1px solid #1877f2; color:#1877f2; padding:6px 10px; border-radius:6px; cursor:pointer;">
-                    ✓
-                </button>
+                <button type="submit" class="btn-mark-all">Mark All as Read</button>
             </form>
-
         </div>
-    {% endfor %}
-{% else %}
-    <p style="color:gray;">No new notifications</p>
-{% endif %}
+    </div>
 
+    <!-- New Notifications Section -->
+    <div class="section-divider">
+        <h2 class="section-title new">
+            <span>✨ New</span>
+            {% if new_notifications %}
+                <span class="notification-badge">{{ new_notifications|length }}</span>
+            {% endif %}
+        </h2>
 
+        {% if new_notifications %}
+            {% for n in new_notifications %}
+                <div class="notification-item new">
+                    <div class="notification-icon">📬</div>
+                    <div class="notification-content">
+                        <p class="notification-message">{{ n.message }}</p>
+                        <div class="notification-time">{{ n.created_at|date:"M d, Y • H:i" }}</div>
+                    </div>
+                    <div class="notification-actions">
+                        <form method="post" action="{% url 'blog:mark_read' n.id %}" style="margin: 0;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-mark-read">
+                                ✓ Read
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <p class="empty-state-text">No new notifications</p>
+            </div>
+        {% endif %}
+    </div>
 
-<!-- OLD -->
-<h3 style="margin-top:25px; color:gray;">Earlier</h3>
+    <!-- Earlier Notifications Section -->
+    <div class="section-divider">
+        <h2 class="section-title old">
+            <span>📋 Earlier</span>
+            {% if old_notifications %}
+                <span class="notification-badge" style="background-color: #cbd5e0; color: #2d3748;">{{ old_notifications|length }}</span>
+            {% endif %}
+        </h2>
 
-{% if old_notifications %}
-    {% for n in old_notifications %}
-        <div style="background:#f0f2f5; border-radius:10px; padding:12px; margin:8px 0;">
-            <p style="margin:0;">{{ n.message }}</p>
-            <small style="color:gray;">{{ n.created_at }}</small>
-        </div>
-    {% endfor %}
-{% else %}
-    <p style="color:gray;">No old notifications</p>
-{% endif %}
+        {% if old_notifications %}
+            {% for n in old_notifications %}
+                <div class="notification-item old">
+                    <div class="notification-icon">📪</div>
+                    <div class="notification-content">
+                        <p class="notification-message">{{ n.message }}</p>
+                        <div class="notification-time">{{ n.created_at|date:"M d, Y • H:i" }}</div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <p class="empty-state-text">No earlier notifications</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}
