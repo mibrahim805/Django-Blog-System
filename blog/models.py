@@ -61,6 +61,6 @@ class Profile(models.Model):
     interested_in = models.ManyToManyField(Category, related_name='interested_users')
 
     def __str__(self):
-        return str(self.user)
+        return str(self.interested_in.all())
 
 

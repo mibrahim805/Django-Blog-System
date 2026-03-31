@@ -15,4 +15,7 @@ urlpatterns = [
     path('mark_all_read/', MarkAllReadView.as_view(), name='mark_all_read'),
     path('notifications/unread-count/', notifications_unread_count, name='notifications_unread_count'),
     path('interests/,' , SelectInterestsView.as_view(), name='interests'),
+    path('my_posts/', MyPostsView.as_view(), name='my_posts'),
+    path('update_post/<int:pk>/', PostUpdateView.as_view(), name='update_post'),
+    path('delete_post/<int:pk>/', PostDeleteView.as_view(), name='delete_post'),
 ]

@@ -5,12 +5,229 @@
 {#</form>#}
 
 
+{##}
+{#<!DOCTYPE html>#}
+{#<html lang="en">#}
+{#<head>#}
+{#    <meta charset="UTF-8">#}
+{#    <title>Select Interests</title>#}
+{#    <style>#}
+{#        body {#}
+{#            font-family: Arial, sans-serif;#}
+{#            background: #f5f5f5;#}
+{#            margin: 0;#}
+{#            padding: 20px;#}
+{#        }#}
+{##}
+{#        .container {#}
+{#            max-width: 500px;#}
+{#            margin: auto;#}
+{#            background: white;#}
+{#            padding: 25px;#}
+{#            border-radius: 12px;#}
+{#            box-shadow: 0 4px 15px rgba(0,0,0,0.08);#}
+{#        }#}
+{##}
+{#        h2 {#}
+{#            text-align: center;#}
+{#            margin-bottom: 5px;#}
+{#        }#}
+{##}
+{#        p {#}
+{#            text-align: center;#}
+{#            color: gray;#}
+{#            margin-bottom: 20px;#}
+{#        }#}
+{##}
+{#        .interest-grid {#}
+{#            display: grid;#}
+{#            grid-template-columns: repeat(2, 1fr);#}
+{#            gap: 12px;#}
+{#        }#}
+{##}
+{#        .interest-card {#}
+{#            display: block;#}
+{#            padding: 15px;#}
+{#            border: 2px solid #ddd;#}
+{#            border-radius: 10px;#}
+{#            text-align: center;#}
+{#            cursor: pointer;#}
+{#            transition: 0.2s;#}
+{#        }#}
+{##}
+{#        .interest-card input {#}
+{#            display: none;#}
+{#        }#}
+{##}
+{#        .interest-card:hover {#}
+{#            border-color: black;#}
+{#        }#}
+{##}
+{#        .interest-card input:checked + span {#}
+{#            font-weight: bold;#}
+{#        }#}
+{##}
+{#        .interest-card:has(input:checked) {#}
+{#            background: black;#}
+{#            color: white;#}
+{#            border-color: black;#}
+{#        }#}
+{##}
+{#        .btn {#}
+{#            margin-top: 20px;#}
+{#            width: 100%;#}
+{#            padding: 12px;#}
+{#            border: none;#}
+{#            border-radius: 25px;#}
+{#            background: black;#}
+{#            color: white;#}
+{#            font-size: 16px;#}
+{#            cursor: pointer;#}
+{#        }#}
+{##}
+{#        .btn:hover {#}
+{#            opacity: 0.9;#}
+{#        }#}
+{#    </style>#}
+{#</head>#}
+{#<body>#}
+{##}
+{#<div class="container">#}
+{#    <h2>What are your interests?</h2>#}
+{#    <p>Select a few to personalize your experience</p>#}
+{##}
+{#    <form method="POST">#}
+{#        {% csrf_token %}#}
+{##}
+{#        <div class="interest-grid">#}
+{#            {% for field in form %}#}
+{#                {% for checkbox in field %}#}
+{#                    <label class="interest-card">#}
+{#                        {{ checkbox.tag }}#}
+{#                        <span>{{ checkbox.choice_label }}</span>#}
+{#                    </label>#}
+{#                {% endfor %}#}
+{#            {% endfor %}#}
+{#        </div>#}
+{#    <!DOCTYPE html>#}
+{#<html lang="en">#}
+{#<head>#}
+{#    <meta charset="UTF-8">#}
+{#    <title>Select Interests</title>#}
+{#    <style>#}
+{#        body {#}
+{#            font-family: Arial, sans-serif;#}
+{#            background: #f5f5f5;#}
+{#            margin: 0;#}
+{#            padding: 20px;#}
+{#        }#}
+{##}
+{#        .container {#}
+{#            max-width: 500px;#}
+{#            margin: auto;#}
+{#            background: white;#}
+{#            padding: 25px;#}
+{#            border-radius: 12px;#}
+{#            box-shadow: 0 4px 15px rgba(0,0,0,0.08);#}
+{#        }#}
+{##}
+{#        h2 {#}
+{#            text-align: center;#}
+{#        }#}
+{##}
+{#        p {#}
+{#            text-align: center;#}
+{#            color: gray;#}
+{#        }#}
+{##}
+{#        .interest-grid {#}
+{#            display: grid;#}
+{#            grid-template-columns: repeat(2, 1fr);#}
+{#            gap: 12px;#}
+{#        }#}
+{##}
+{#        .interest-card {#}
+{#            padding: 15px;#}
+{#            border: 2px solid #ddd;#}
+{#            border-radius: 10px;#}
+{#            text-align: center;#}
+{#            cursor: pointer;#}
+{#            transition: 0.2s;#}
+{#        }#}
+{##}
+{#        .interest-card input {#}
+{#            display: none;#}
+{#        }#}
+{##}
+{#        .interest-card:has(input:checked) {#}
+{#            background: black;#}
+{#            color: white;#}
+{#            border-color: black;#}
+{#        }#}
+{##}
+{#        .btn {#}
+{#            margin-top: 20px;#}
+{#            width: 100%;#}
+{#            padding: 12px;#}
+{#            border: none;#}
+{#            border-radius: 25px;#}
+{#            background: black;#}
+{#            color: white;#}
+{#            font-size: 16px;#}
+{#            cursor: pointer;#}
+{#        }#}
+{##}
+{#        .add-btn {#}
+{#            margin-top: 15px;#}
+{#            width: 100%;#}
+{#            padding: 10px;#}
+{#            border-radius: 20px;#}
+{#            border: 2px dashed #aaa;#}
+{#            background: transparent;#}
+{#            cursor: pointer;#}
+{#        }#}
+{##}
+{#        .custom-input {#}
+{#            margin-top: 10px;#}
+{#            display: none;#}
+{#        }#}
+{##}
+{#        .custom-input input {#}
+{#            width: 100%;#}
+{#            padding: 10px;#}
+{#            border-radius: 8px;#}
+{#            border: 1px solid #ccc;#}
+{#        }#}
+{#    </style>#}
+{#    <div class="container">#}
+{#    <h2>What are your interests?</h2>#}
+{#    <p>Select or add your own</p>#}
+{##}
+{#    <form method="POST">#}
+{#        {% csrf_token %}#}
+{##}
+{#        <!-- Custom Interest Button -->#}
+{#        <button type="button" class="add-btn" onclick="toggleInput()">#}
+{#            + Add your own interest#}
+{#        </button>#}
+{##}
+{#        <!-- Custom Input Field -->#}
+{#        <div class="custom-input" id="customInput" style="display:none;">#}
+{#            <input type="text" name="custom_interest" placeholder="Type your interest...">#}
+{#        </div>#}
+{##}
+{#        <button type="submit" class="btn">Continue</button>#}
+{#    </form>#}
+{#</div>#}
+
+
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Select Interests</title>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -28,124 +245,17 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
         }
 
-        h2 {
+        h2, p {
             text-align: center;
-            margin-bottom: 5px;
         }
 
-        p {
-            text-align: center;
-            color: gray;
+        .interest-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
             margin-bottom: 20px;
         }
 
-        .interest-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-        }
-
-        .interest-card {
-            display: block;
-            padding: 15px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .interest-card input {
-            display: none;
-        }
-
-        .interest-card:hover {
-            border-color: black;
-        }
-
-        .interest-card input:checked + span {
-            font-weight: bold;
-        }
-
-        .interest-card:has(input:checked) {
-            background: black;
-            color: white;
-            border-color: black;
-        }
-
-        .btn {
-            margin-top: 20px;
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 25px;
-            background: black;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        .btn:hover {
-            opacity: 0.9;
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <h2>What are your interests?</h2>
-    <p>Select a few to personalize your experience</p>
-
-    <form method="POST">
-        {% csrf_token %}
-
-        <div class="interest-grid">
-            {% for field in form %}
-                {% for checkbox in field %}
-                    <label class="interest-card">
-                        {{ checkbox.tag }}
-                        <span>{{ checkbox.choice_label }}</span>
-                    </label>
-                {% endfor %}
-            {% endfor %}
-        </div>
-    <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Select Interests</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 500px;
-            margin: auto;
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        }
-
-        h2 {
-            text-align: center;
-        }
-
-        p {
-            text-align: center;
-            color: gray;
-        }
-
-        .interest-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-        }
-
         .interest-card {
             padding: 15px;
             border: 2px solid #ddd;
@@ -166,14 +276,12 @@
         }
 
         .btn {
-            margin-top: 20px;
             width: 100%;
             padding: 12px;
             border: none;
             border-radius: 25px;
             background: black;
             color: white;
-            font-size: 16px;
             cursor: pointer;
         }
 
@@ -200,33 +308,49 @@
         }
     </style>
 </head>
+
 <body>
 
 <div class="container">
     <h2>What are your interests?</h2>
-    <p>Select or add your own</p>
+    <p>Select your interesting feed</p>
 
-        <!-- Custom Interest Button -->
-        <button type="button" class="add-btn" onclick="toggleInput()">
-            + Add your own interest
-        </button>
+    <form method="POST">
+        {% csrf_token %}
 
-        <!-- Custom Input Field -->
-        <div class="custom-input" id="customInput">
-            <input type="text" name="custom_interest" placeholder="Type your interest...">
+        <!-- Interests -->
+        <div class="interest-grid">
+            {% for field in form %}
+                {% for checkbox in field %}
+                    <label class="interest-card">
+                        {{ checkbox.tag }}
+                        <span>{{ checkbox.choice_label }}</span>
+                    </label>
+                {% endfor %}
+            {% endfor %}
         </div>
+
+        <!-- Add Custom -->
+{#        <button type="button" class="add-btn" onclick="toggleInput()">#}
+{#            + Add your own interest#}
+{#        </button>#}
+{##}
+{#        <div class="custom-input" id="customInput">#}
+{#            <input type="text" name="custom_interest" placeholder="Type your interest...">#}
+{#        </div>#}
+
+        <br>
 
         <button type="submit" class="btn">Continue</button>
     </form>
 </div>
 
-<script>
-    function toggleInput() {
-        const input = document.getElementById("customInput");
-        input.style.display = input.style.display === "none" || input.style.display === "" 
-            ? "block" 
-            : "none";
-    }
-</script>
+{#<script>#}
+{#    function toggleInput() {#}
+{#        const el = document.getElementById("customInput");#}
+{#        el.style.display = (el.style.display === "block") ? "none" : "block";#}
+{#    }#}
+{#</script>#}
+
 </body>
 </html>
