@@ -1,14 +1,13 @@
 from django.test import TestCase
 from django.urls import reverse
-from django.contrib.auth.models import User
 
-from blog.models import Comment, Like, Notification, Post
+from blog.models import Comment, Like, Notification, Post, CustomUser
 
 
 class PostEngagementTests(TestCase):
 	def setUp(self):
-		self.author = User.objects.create_user(username="author", password="pass12345")
-		self.user = User.objects.create_user(username="reader", password="pass12345")
+		self.author = CustomUser.objects.create_user(username="author", password="pass12345")
+		self.user = CustomUser.objects.create_user(username="reader", password="pass12345")
 		self.post = Post.objects.create(title="Post 1", content="Body", author=self.author, is_published=True)
 
 	def test_user_can_like_and_unlike_post(self):

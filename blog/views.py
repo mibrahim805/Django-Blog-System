@@ -1,8 +1,5 @@
-from urllib import response
-
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
@@ -10,16 +7,30 @@ from django.views import View
 from django.views.generic import CreateView, ListView, FormView, UpdateView, DeleteView
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
-from twisted.names.client import query
+from django_filters.views import FilterView
 
-from blog.forms import RegistrationForm, PostCreateForm, CommentForm, InterestForm, CategoryCreateForm
-from blog.models import Post, Notification, Comment, Like, Profile, Category
+from blog.filters import PostFilter
+from blog.forms import RegistrationForm, PostCreateForm, CommentForm, InterestForm
+from blog.models import Post, Notification, Comment, Like, Profile, Category, CustomUser
 
 
+def create_and_push_notification(*, user, post, sender, message):
+    notification = Notification.objects.create(user=user, post=post, sender=sender, message=message)
+    channel_layer = get_channel_layer()
+
+    async_to_sync(channel_layer.group_send)(
+        f"user_{user.id}",
+        {
+            "type": "send_notification",
+            "message": message,
+            "notification_id": notification.id,
+        }
+    )
+    return notification
 
 
 class UserRegisterView(CreateView):
-    model = User
+    model = CustomUser
     form_class = RegistrationForm
     template_name = "registration/register.html"
     success_url = reverse_lazy("blog:interests")
@@ -30,24 +41,59 @@ class UserRegisterView(CreateView):
         Profile.objects.create(user=self.object)
 
         return response
+#
+# class PostListView(LoginRequiredMixin, ListView):
+#     model = Post
+#     template_name = "post/post_list.html"
+#     context_object_name = "posts"
+#     ordering = ["-created_at"]
+#
+#     def get_selected_category(self):
+#         selected_category = []
+#         for value in self.request.GET.getlist("categories"):
+#             try:
+#                 selected_category.append(value)
+#             except (TypeError, ValueError):
+#                 continue
+#         return list(Category.objects.filter(id__in=selected_category).values_list("id", flat=True))
+#
+#     def get_queryset(self):
+#         queryset = Post.objects.filter(is_published=True)
+#
+#         selected_categories = self.get_selected_category()
+#
+#         if selected_categories:
+#             queryset = queryset.filter(category_id__in=selected_categories)
+#
+#         return queryset
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context["all_categories"] = Category.objects.order_by("name")
+#
+#         context["selected_category_ids"] = self.get_selected_category()
+#         return context
 
-class PostListView(LoginRequiredMixin, ListView):
+
+
+class PostListView(LoginRequiredMixin, FilterView):
     model = Post
     template_name = "post/post_list.html"
     context_object_name = "posts"
     ordering = ["-created_at"]
-
+    filterset_class = PostFilter
 
     def get_queryset(self):
-        user = self.request.user
-        profile, created = Profile.objects.get_or_create(user=user)
-        interests = profile.interested_in.all()
-        queryset = Post.objects.filter(is_published=True)
+        return Post.objects.filter(is_published=True).order_by("-created_at")
 
-        if interests.exists():
-            queryset = queryset.filter(categories__in=interests).distinct()
-        return queryset
-
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["all_categories"] = Category.objects.order_by("name")
+        
+        # Get selected categories from request (filter out "all")
+        selected_category_ids = [int(id) for id in self.request.GET.getlist("categories") if id and id != "all"]
+        context["selected_category_ids"] = selected_category_ids
+        
+        return context
 
 
 class PostCreateView(LoginRequiredMixin, CreateView):
@@ -62,7 +108,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 
         if form.instance.is_published:
             print("is_published")
-            users = User.objects.exclude(id=self.request.user.id)
+            users = CustomUser.objects.exclude(id=self.request.user.id)
             for user in users:
                 create_and_push_notification(user=user,post=form.instance,sender=self.request.user,message=f"{self.request.user.username} published a new post.",)
         return response
@@ -78,7 +124,7 @@ class PostUpdateView(LoginRequiredMixin, UpdateView):
         response= super().form_valid(form)
         if form.instance.is_published:
             print("is_published")
-            users = User.objects.exclude(id=self.request.user.id)
+            users = CustomUser.objects.exclude(id=self.request.user.id)
             for user in users:
                 create_and_push_notification(user=user,post=form.instance,sender=self.request.user,message=f"{self.request.user.username} published a new post.",)
         return response
@@ -154,19 +200,16 @@ class MarkAllReadView(LoginRequiredMixin, View):
         return redirect("blog:notifications_list")
 
 
-class SelectInterestsView(FormView):
+class SelectInterestsView(LoginRequiredMixin, FormView):
     template_name = "interest/select_interest.html"
     form_class = InterestForm
     success_url = reverse_lazy("blog:home")
 
     def form_valid(self, form):
-        interests = form.cleaned_data['interests']
-
+        interests = form.cleaned_data["interests"]
         profile = self.request.user.profile
         profile.interested_in.set(interests)
-
         return super().form_valid(form)
-
 
 class MyPostsView(LoginRequiredMixin, ListView):
     model = Post
@@ -179,3 +222,26 @@ class MyPostsView(LoginRequiredMixin, ListView):
         print("USER:", self.request.user)
         print("POSTS:", queryset)
         return queryset
+
+
+class UserProfileView(LoginRequiredMixin, View):
+    def get(self, request):
+        user = request.user
+        profile = user.profile
+        user_posts = Post.objects.filter(author=user).count()
+        user_likes = Like.objects.filter(user=user).count()
+        user_comments = Comment.objects.filter(user=user).count()
+        
+        context = {
+            'user': user,
+            'profile': profile,
+            'user_posts': user_posts,
+            'user_likes': user_likes,
+            'user_comments': user_comments,
+            'interests': profile.interested_in.all(),
+        }
+        return render(request, 'profile/my_profile.html', context)
+
+
+
+

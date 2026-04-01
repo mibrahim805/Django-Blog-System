@@ -1,8 +1,5 @@
-# # import Category
-# from django.db import models
-# from django.contrib.auth.models import User, AbstractUser
-#
-# from BlogSystem2 import settings
+# import Category
+# from django.contrib.auth.admin import UserAdmin
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
@@ -18,7 +15,7 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_published = models.BooleanField(default=False)
-    category = models.ForeignKey("Category", on_delete=models.CASCADE, default=None, null=True, blank=True)
+    category = models.ManyToManyField("Category", blank=True)
 
 
     def __str__(self):
@@ -50,7 +47,7 @@ class Notification(models.Model):
     message = models.TextField()
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notifications_sent')
+    sender = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='notifications_sent')
 
 
     def __str__(self):
@@ -59,7 +56,7 @@ class Notification(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=200)
-    posts = models.ManyToManyField(Post, related_name='categories')
+    posts = models.ManyToManyField(Post, related_name='categories', blank=True)
 
 
     def __str__(self):

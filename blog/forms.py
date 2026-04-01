@@ -1,13 +1,12 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
 
-from blog.models import Comment, Post, Category
+from blog.models import Comment, Post, Category, CustomUser
 
 
 class RegistrationForm(UserCreationForm):
     class Meta:
-        model=User
+        model=CustomUser
         fields=["username" ,"email","password1","password2"]
 
 class PostCreateForm(forms.ModelForm):

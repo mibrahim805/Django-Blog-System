@@ -29,6 +29,48 @@
                         🏠 Home
                     </a>
                 </li>
+                <!-- Filter Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle filter-toggle" href="#" id="filterDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        🔍 Filter
+                    </a>
+                    <div class="dropdown-menu filter-dropdown-menu" aria-labelledby="filterDropdown">
+                        <form method="get" action="{% url 'blog:home' %}" class="filter-form">
+                            <div class="filter-menu-header">
+                                <h6>Filter by Categories</h6>
+                                <button type="button" class="btn-close-filter" data-bs-dismiss="dropdown" aria-label="Close"></button>
+                            </div>
+
+                            <div class="filter-options">
+                                {% for category in all_categories %}
+                                    <div class="filter-option">
+                                        <input
+                                            type="checkbox"
+                                            name="categories"
+                                            value="{{ category.id }}"
+                                            id="cat_{{ category.id }}"
+                                            class="filter-checkbox"
+                                            {% if category.id in selected_category_ids %}checked{% endif %}
+                                        >
+                                        <label for="cat_{{ category.id }}" class="filter-label">
+                                            <span class="checkbox-custom"></span>
+                                            <span class="category-name">{{ category.name }}</span>
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="filter-actions">
+                                <button type="submit" class="btn btn-filter-apply">
+                                    ✓ Apply
+                                </button>
+                                <a href="{% url 'blog:home' %}" class="btn btn-filter-clear">
+                                    ✕ Clear
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </li>
             </ul>
 
             <!-- Right Links -->
@@ -64,7 +106,7 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                             <li>
-                                <a class="dropdown-item" href="#">
+                                <a class="dropdown-item" href="{% url 'blog:profile' %}">
                                     👤 Profile
                                 </a>
                             </li>
@@ -75,9 +117,12 @@
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <a class="dropdown-item logout-link" href="{% url 'logout' %}">
-                                    🚪 Logout
-                                </a>
+                                <form method="post" action="{% url 'logout' %}" class="m-0">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item logout-link" style="width: 100%; text-align: left; background: none; border: none; padding: 0.5rem 1rem; cursor: pointer;">
+                                        🚪 Sign Out
+                                    </button>
+                                </form>
                             </li>
                         </ul>
                     </li>
@@ -313,5 +358,250 @@
 
     .navbar-toggler-icon {
         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.9%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
+
+    /* ===== FILTER DROPDOWN STYLES ===== */
+    .filter-dropdown-menu {
+        min-width: 280px !important;
+        background: white !important;
+        border: 2px solid #e2e8f0 !important;
+        border-radius: 12px !important;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16) !important;
+        padding: 0 !important;
+        margin-top: 12px !important;
+        animation: slideDown 0.2s ease-out;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-8px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .filter-menu-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 16px;
+        border-bottom: 2px solid #f0f0f0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 10px 10px 0 0;
+    }
+
+    .filter-menu-header h6 {
+        margin: 0;
+        font-weight: 700;
+        color: white;
+        font-size: 14px;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-close-filter {
+        appearance: none;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 20px;
+        cursor: pointer;
+        padding: 0;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+
+    .btn-close-filter:hover {
+        transform: rotate(90deg);
+    }
+
+    .filter-form {
+        padding: 0;
+    }
+
+    .filter-options {
+        padding: 12px 8px;
+        max-height: 320px;
+        overflow-y: auto;
+    }
+
+    .filter-option {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        margin-bottom: 4px;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+
+    .filter-option:hover {
+        background-color: #f0f5ff;
+    }
+
+    .filter-checkbox {
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        border: 2px solid #cbd5e0;
+        border-radius: 4px;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.2s ease;
+        margin-right: 10px;
+        flex-shrink: 0;
+    }
+
+    .filter-checkbox:hover {
+        border-color: #667eea;
+        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+    }
+
+    .filter-checkbox:checked {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: #667eea;
+    }
+
+    .filter-checkbox:checked::after {
+        content: '✓';
+        position: absolute;
+        top: -4px;
+        left: 3px;
+        color: white;
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    .filter-label {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        margin: 0;
+        cursor: pointer;
+        font-weight: 500;
+        color: #2d3748;
+        transition: all 0.2s ease;
+    }
+
+    .checkbox-custom {
+        display: none;
+    }
+
+    .category-name {
+        font-size: 14px;
+        color: #2d3748;
+    }
+
+    .filter-option:hover .category-name {
+        color: #667eea;
+        font-weight: 600;
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 8px;
+        padding: 12px 12px;
+        border-top: 2px solid #f0f0f0;
+        background-color: #f8f9fa;
+        border-radius: 0 0 10px 10px;
+    }
+
+    .btn-filter-apply {
+        flex: 1;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 6px !important;
+        font-weight: 600 !important;
+        padding: 8px 12px !important;
+        font-size: 13px !important;
+        cursor: pointer;
+        transition: all 0.2s ease !important;
+    }
+
+    .btn-filter-apply:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+    }
+
+    .btn-filter-clear {
+        flex: 1;
+        background: white !important;
+        color: #4a5568 !important;
+        border: 2px solid #e5e7eb !important;
+        border-radius: 6px !important;
+        font-weight: 600 !important;
+        padding: 8px 12px !important;
+        font-size: 13px !important;
+        cursor: pointer;
+        transition: all 0.2s ease !important;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-filter-clear:hover {
+        background-color: #f3f4f6 !important;
+        border-color: #d1d5db !important;
+        color: #111827 !important;
+        transform: translateY(-2px);
+    }
+
+    .filter-toggle {
+        position: relative;
+    }
+
+    .filter-toggle::after {
+        content: '';
+        display: inline-block;
+        margin-left: 6px;
+        vertical-align: 0.255em;
+        border-top: 0.3em solid;
+        border-right: 0.3em solid transparent;
+        border-bottom: 0;
+        border-left: 0.3em solid transparent;
+        transition: transform 0.2s ease;
+    }
+
+    .filter-toggle[aria-expanded="true"]::after {
+        transform: rotate(180deg);
+    }
+
+    /* Scrollbar styling for filter options */
+    .filter-options::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .filter-options::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .filter-options::-webkit-scrollbar-thumb {
+        background: #cbd5e0;
+        border-radius: 10px;
+    }
+
+    .filter-options::-webkit-scrollbar-thumb:hover {
+        background: #a0aec0;
+    }
+
+    @media (max-width: 991px) {
+        .filter-dropdown-menu {
+            min-width: 100% !important;
+            left: -12px !important;
+            right: -12px !important;
+        }
+
+        .filter-options {
+            max-height: 240px;
+        }
     }
 </style>

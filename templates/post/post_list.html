@@ -23,7 +23,7 @@
 
     .page-header {
         display: flex;
-        justify-content: space-between;
+        justify-content: flex-start;
         align-items: center;
         margin-bottom: 40px;
         padding-bottom: 20px;
@@ -37,11 +37,6 @@
         margin: 0;
     }
 
-    .header-actions {
-        display: flex;
-        gap: 10px;
-    }
-
     .btn-custom {
         padding: 10px 20px;
         border-radius: 8px;
@@ -52,28 +47,8 @@
         text-decoration: none;
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         gap: 6px;
-    }
-
-    .btn-create {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-        color: white;
-    }
-
-    .btn-create:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-        color: white;
-    }
-
-    .btn-my-posts {
-        background-color: #ffc107;
-        color: #333;
-    }
-
-    .btn-my-posts:hover {
-        background-color: #ffb300;
-        transform: translateY(-2px);
     }
 
     .post-card {
@@ -141,6 +116,28 @@
         font-size: 15px;
         line-height: 1.6;
         margin-bottom: 16px;
+    }
+
+
+    .post-category {
+        margin-bottom: 12px;
+    }
+
+    .category-chip {
+        display: inline-block;
+        background: #eef2ff;
+        color: #4338ca;
+        border: 1px solid #c7d2fe;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 5px 10px;
+        border-radius: 999px;
+    }
+
+    .category-chip.empty {
+        background: #f3f4f6;
+        color: #4b5563;
+        border-color: #e5e7eb;
     }
 
     .post-stats {
@@ -269,12 +266,9 @@
             gap: 16px;
         }
 
-        .header-actions {
-            width: 100%;
-        }
-
         .btn-custom {
-            flex: 1;
+            width: 100%;
+            justify-content: center;
         }
 
         .post-title {
@@ -288,92 +282,242 @@
         .post-stat-item {
             flex-wrap: wrap;
         }
+
+        .filter-actions {
+            flex-direction: column;
+        }
+
+        .filter-actions .btn-custom {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .filters-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .filters-title {
+            font-size: 14px;
+        }
+
+        .filters-panel {
+            padding: 16px;
+        }
     }
 </style>
-
+{##}
+{#<div class="posts-container">#}
+{#    <!-- Page Header -->#}
+{#    <div class="page-header">#}
+{#        <h1>📝 All Posts</h1>#}
+{#        <div class="header-actions">#}
+{#            <a href="{% url 'blog:my_posts' %}" class="btn-custom btn-my-posts">My Posts</a>#}
+{#            <a href="{% url 'blog:create_post' %}" class="btn-custom btn-create">#}
+{#                ➕ Create Post#}
+{#            </a>#}
+{#        </div>#}
+{#    </div>#}
+{##}
+{#    <div class="filters-panel">#}
+{#        <div class="filters-title">Filter by Categories</div>#}
+{#        <form method="get">#}
+{#            <select name="categories" multiple class="category-select">#}
+{#                {% for category in all_categories %}#}
+{#                    <option value="{{ category.id }}" {% if category.id in selected_category_ids %}selected{% endif %}>#}
+{#                        {{ category.name }}#}
+{#                    </option>#}
+{#                {% endfor %}#}
+{#            </select>#}
+{#            <div class="filter-actions">#}
+{#                <button type="submit" class="btn-custom btn-filter">Apply Filter</button>#}
+{#                <a href="{% url 'blog:home' %}" class="btn-custom btn-clear">Clear</a>#}
+{#            </div>#}
+{#        </form>#}
+{#    </div>#}
+{##}
+{#    <!-- Posts List -->#}
+{#    {% for post in posts %}#}
+{#        <div class="post-card">#}
+{#            <!-- Post Header with Author -->#}
+{#            <div class="post-header">#}
+{#                <div class="post-author-info">#}
+{#                    <div class="post-author-avatar">#}
+{#                        {{ post.author.username|first|upper }}#}
+{#                    </div>#}
+{#                    <div class="post-author-details">#}
+{#                        <strong>{{ post.author.username }}</strong>#}
+{#                        <small>{{ post.created_at|date:"M d, Y" }}</small>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{##}
+{#            <!-- Post Content -->#}
+{#            <h3 class="post-title">{{ post.title }}</h3>#}
+{#            <div class="post-category">#}
+{#                {% if post.category %}#}
+{#                    <span class="category-chip">Category: {{ post.category.name }}</span>#}
+{#                {% else %}#}
+{#                    <span class="category-chip empty">Category: Uncategorized</span>#}
+{#                {% endif %}#}
+{#            </div>#}
+{#            <p class="post-content">{{ post.content }}</p>#}
+{##}
+{#            <!-- Post Stats -->#}
+{#            <div class="post-stats">#}
+{#                <div class="post-stat-item">#}
+{#                    <span>👍</span>#}
+{#                    <span><strong>{{ post.like_set.count }}</strong> {{ post.like_set.count|pluralize:"Like,Likes" }}</span>#}
+{#                </div>#}
+{#                <div class="post-stat-item">#}
+{#                    <span>💬</span>#}
+{#                    <span><strong>{{ post.comments.count }}</strong> {{ post.comments.count|pluralize:"Comment,Comments" }}</span>#}
+{#                </div>#}
+{#            </div>#}
+{##}
+{#            <!-- Post Actions -->#}
+{#            <div class="post-actions">#}
+{#                <form method="post" action="{% url 'blog:like_post' post.id %}" style="flex: 1;">#}
+{#                    {% csrf_token %}#}
+{#                    {% if post.id in liked_post_ids %}#}
+{#                        <button type="submit" class="post-action-btn btn-like liked">#}
+{#                            👍 Unlike#}
+{#                        </button>#}
+{#                    {% else %}#}
+{#                        <button type="submit" class="post-action-btn btn-like">#}
+{#                            👍 Like#}
+{#                        </button>#}
+{#                    {% endif %}#}
+{#                </form>#}
+{#                <a href="{% url 'blog:create_comment' post.id %}" class="post-action-btn btn-comment">#}
+{#                    💬 Comment#}
+{#                </a>#}
+{#            </div>#}
+{##}
+{#            <!-- Comments Section -->#}
+{#            {% if post.comments.all %}#}
+{#                <div class="comments-section">#}
+{#                    <div class="comments-title">Recent Comments</div>#}
+{#                    {% for comment in post.comments.all|slice:":3" %}#}
+{#                        <div class="comment-item">#}
+{#                            <div class="comment-author">{{ comment.user.username }}</div>#}
+{#                            <p class="comment-text">{{ comment.content }}</p>#}
+{#                        </div>#}
+{#                    {% endfor %}#}
+{#                </div>#}
+{#            {% endif %}#}
+{#        </div>#}
+{#    {% empty %}#}
+{#        <div class="empty-state">#}
+{#            <div class="empty-state-icon">📭</div>#}
+{#            <p>No posts available yet. Be the first to create one!</p>#}
+{#        </div>#}
+{#    {% endfor %}#}
+{#</div>#}
+{##}
+{#<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>#}
+{#{% endblock %}#}
 <div class="posts-container">
-    <!-- Page Header -->
-    <div class="page-header">
-        <h1>📝 All Posts</h1>
-        <div class="header-actions">
-            <a href="{% url 'blog:my_posts' %}" class="btn-custom btn-my-posts">My Posts</a>
-            <a href="{% url 'blog:create_post' %}" class="btn-custom btn-create">
-                ➕ Create Post
-            </a>
-        </div>
-    </div>
 
-    <!-- Posts List -->
-    {% for post in posts %}
-        <div class="post-card">
-            <!-- Post Header with Author -->
-            <div class="post-header">
-                <div class="post-author-info">
-                    <div class="post-author-avatar">
-                        {{ post.author.username|first|upper }}
-                    </div>
-                    <div class="post-author-details">
-                        <strong>{{ post.author.username }}</strong>
-                        <small>{{ post.created_at|date:"M d, Y" }}</small>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Post Content -->
-            <h3 class="post-title">{{ post.title }}</h3>
-            <p class="post-content">{{ post.content }}</p>
-
-            <!-- Post Stats -->
-            <div class="post-stats">
-                <div class="post-stat-item">
-                    <span>👍</span>
-                    <span><strong>{{ post.like_set.count }}</strong> {{ post.like_set.count|pluralize:"Like,Likes" }}</span>
-                </div>
-                <div class="post-stat-item">
-                    <span>💬</span>
-                    <span><strong>{{ post.comments.count }}</strong> {{ post.comments.count|pluralize:"Comment,Comments" }}</span>
-                </div>
-            </div>
-
-            <!-- Post Actions -->
-            <div class="post-actions">
-                <form method="post" action="{% url 'blog:like_post' post.id %}" style="flex: 1;">
-                    {% csrf_token %}
-                    {% if post.id in liked_post_ids %}
-                        <button type="submit" class="post-action-btn btn-like liked">
-                            👍 Unlike
-                        </button>
-                    {% else %}
-                        <button type="submit" class="post-action-btn btn-like">
-                            👍 Like
-                        </button>
-                    {% endif %}
-                </form>
-                <a href="{% url 'blog:create_comment' post.id %}" class="post-action-btn btn-comment">
-                    💬 Comment
-                </a>
-            </div>
-
-            <!-- Comments Section -->
-            {% if post.comments.all %}
-                <div class="comments-section">
-                    <div class="comments-title">Recent Comments</div>
-                    {% for comment in post.comments.all|slice:":3" %}
-                        <div class="comment-item">
-                            <div class="comment-author">{{ comment.user.username }}</div>
-                            <p class="comment-text">{{ comment.content }}</p>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        </div>
-    {% empty %}
-        <div class="empty-state">
-            <div class="empty-state-icon">📭</div>
-            <p>No posts available yet. Be the first to create one!</p>
-        </div>
-    {% endfor %}
+<!-- Page Header -->
+<div class="page-header">
+    <h1>📄 All Posts</h1>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Posts List -->
+{% for post in posts %}
+    <div class="post-card">
+
+        <!-- Post Header -->
+        <div class="post-header">
+            <div class="post-author-info">
+                <div class="post-author-avatar">
+                    {{ post.author.username|first|upper }}
+                </div>
+                <div class="post-author-details">
+                    <strong>{{ post.author.username }}</strong>
+                    <small>{{ post.created_at|date:"M d, Y" }}</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Post Content -->
+        <h3 class="post-title">{{ post.title }}</h3>
+
+        <!-- Categories (FIXED) -->
+        <div class="post-category">
+            {% if post.categories.exists %}
+                <span class="category-chip">
+                    {% for category in post.categories.all %}
+                        {{ category.name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </span>
+            {% else %}
+                <span class="category-chip empty">Uncategorized</span>
+            {% endif %}
+        </div>
+
+        <p class="post-content">{{ post.content }}</p>
+
+        <!-- Stats -->
+        <div class="post-stats">
+            <div class="post-stat-item">
+                <span>👍</span>
+                <span><strong>{{ post.like_set.count }}</strong> {{ post.like_set.count|pluralize:"Like,Likes" }}</span>
+            </div>
+
+            <div class="post-stat-item">
+                <span>💬</span>
+                <span><strong>{{ post.comments.count }}</strong> {{ post.comments.count|pluralize:"Comment,Comments" }}</span>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="post-actions">
+            <form method="post" action="{% url 'blog:like_post' post.id %}" style="flex: 1;">
+                {% csrf_token %}
+                {% if post.id in liked_post_ids %}
+                    <button type="submit" class="post-action-btn btn-like liked">
+                        💔 Unlike
+                    </button>
+                {% else %}
+                    <button type="submit" class="post-action-btn btn-like">
+                        ❤️ Like
+                    </button>
+                {% endif %}
+            </form>
+
+            <a href="{% url 'blog:create_comment' post.id %}" class="post-action-btn btn-comment">
+                💬 Comment
+            </a>
+        </div>
+
+        <!-- Comments -->
+        {% if post.comments.exists %}
+            <div class="comments-section">
+                <div class="comments-title">Recent Comments</div>
+
+                {% for comment in post.comments.all|slice:":3" %}
+                    <div class="comment-item">
+                        <div class="comment-author">
+                            {{ comment.user.username }}
+                        </div>
+                        <p class="comment-text">{{ comment.content }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+    </div>
+{% empty %}
+    <div class="empty-state">
+        <div class="empty-state-icon">📭</div>
+        <p>No posts available yet. Be the first to create one!</p>
+    </div>
+{% endfor %}
+
+</div>
+
 {% endblock %}
+

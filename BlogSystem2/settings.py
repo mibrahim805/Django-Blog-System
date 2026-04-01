@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_filters',
     'channels',
     'blog',
 ]
@@ -66,6 +67,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'blog.context_processors.notifications_badge',
+                'blog.context_processors.navbar_context',
             ],
         },
     },
@@ -118,9 +120,9 @@ USE_TZ = True
 
 AUTH_USER_MODEL = 'blog.CustomUser'
 
-LOGIN_URL = '/accounts/login/'
-LOGIN_REDIRECT_URL= '/post_list/'
-
+LOGIN_URL = 'blog:login'
+LOGIN_REDIRECT_URL = '/post_list/'
+LOGOUT_REDIRECT_URL = 'blog:login'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/

@@ -1,3 +1,4 @@
+                    <span class="category-chip empty">Category: Uncategorized</span>
 {#{% extends "base.html" %}#}
 {##}
 {#{% block content %}#}
@@ -263,6 +264,27 @@
         margin-bottom: 16px;
     }
 
+    .post-category {
+        margin-bottom: 12px;
+    }
+
+    .category-chip {
+        display: inline-block;
+        background: #eef2ff;
+        color: #4338ca;
+        border: 1px solid #c7d2fe;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 5px 10px;
+        border-radius: 999px;
+    }
+
+    .category-chip.empty {
+        background: #f3f4f6;
+        color: #4b5563;
+        border-color: #e5e7eb;
+    }
+
     .post-stats {
         display: flex;
         gap: 20px;
@@ -474,6 +496,15 @@
 
             <!-- Post Content -->
             <h3 class="post-title">{{ post.title }}</h3>
+            <div class="post-category">
+                {% if post.category.all %}
+                    {% for cat in post.category.all %}
+                        <span class="category-chip">Category: {{ cat.name }}</span>
+                    {% endfor %}
+                {% else %}
+                    <span class="category-chip empty">Category: Uncategorized</span>
+                {% endif %}
+            </div>
             <p class="post-content">{{ post.content }}</p>
 
             <!-- Post Stats -->

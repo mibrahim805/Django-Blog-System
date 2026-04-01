@@ -1,0 +1,500 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="profile-container">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <div class="profile-header-content">
+            <!-- User Avatar -->
+            <div class="profile-avatar-large">
+                {{ user.username|first|upper }}
+            </div>
+
+            <!-- User Info -->
+            <div class="profile-info">
+                <h1 class="profile-username">{{ user.username }}</h1>
+                <p class="profile-email">{{ user.email }}</p>
+                <p class="profile-join-date">
+                    📅 Member since {{ user.date_joined|date:"F Y" }}
+                </p>
+
+                <!-- Action Buttons -->
+                <div class="profile-actions">
+                    <a href="{% url 'blog:interests' %}" class="btn btn-primary">
+                        ⭐ Edit Interests
+                    </a>
+                    <a href="{% url 'blog:my_posts' %}" class="btn btn-secondary">
+                        📄 My Posts
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="profile-stats">
+        <div class="stat-card">
+            <div class="stat-number">{{ user_posts }}</div>
+            <div class="stat-label">Posts Published</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ user_likes }}</div>
+            <div class="stat-label">Likes Received</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ user_comments }}</div>
+            <div class="stat-label">Comments</div>
+        </div>
+    </div>
+
+    <!-- Interests Section -->
+    <div class="profile-section">
+        <h2 class="section-title">⭐ My Interests</h2>
+
+        {% if interests %}
+            <div class="interests-grid">
+                {% for interest in interests %}
+                    <div class="interest-chip">
+                        {{ interest.name }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <p>No interests selected yet</p>
+                <a href="{% url 'blog:interests' %}" class="btn btn-primary">
+                    ⭐ Add Interests
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- User Details Section -->
+    <div class="profile-section">
+        <h2 class="section-title">👤 Account Details</h2>
+
+        <div class="details-grid">
+            <div class="detail-item">
+                <span class="detail-label">First Name:</span>
+                <span class="detail-value">{{ user.first_name|default:"Not set" }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Last Name:</span>
+                <span class="detail-value">{{ user.last_name|default:"Not set" }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Email:</span>
+                <span class="detail-value">{{ user.email }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Username:</span>
+                <span class="detail-value">{{ user.username }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Account Status:</span>
+                <span class="detail-value">
+                    {% if user.is_active %}
+                        <span class="badge-active">Active</span>
+                    {% else %}
+                        <span class="badge-inactive">Inactive</span>
+                    {% endif %}
+                </span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Member Since:</span>
+                <span class="detail-value">{{ user.date_joined|date:"M d, Y" }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity Section -->
+    <div class="profile-section">
+        <h2 class="section-title">📊 Recent Activity</h2>
+
+        <div class="activity-stats">
+            <div class="activity-item">
+                <div class="activity-icon">📝</div>
+                <div class="activity-content">
+                    <h4>{{ user_posts }} Post{{ user_posts|pluralize }}</h4>
+                    <p>Published on your profile</p>
+                </div>
+            </div>
+            <div class="activity-item">
+                <div class="activity-icon">❤️</div>
+                <div class="activity-content">
+                    <h4>{{ user_likes }} Like{{ user_likes|pluralize }}</h4>
+                    <p>Received from the community</p>
+                </div>
+            </div>
+            <div class="activity-item">
+                <div class="activity-icon">💬</div>
+                <div class="activity-content">
+                    <h4>{{ user_comments }} Comment{{ user_comments|pluralize }}</h4>
+                    <p>Shared with other posts</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<style>
+    :root {
+        --primary-color: #667eea;
+        --secondary-color: #764ba2;
+        --accent-color: #ffc107;
+        --text-dark: #2d3748;
+        --text-light: #718096;
+        --border-color: #e2e8f0;
+        --bg-light: #f7fafc;
+    }
+
+    .profile-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    /* ===== PROFILE HEADER ===== */
+    .profile-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        border-radius: 16px;
+        padding: 40px;
+        margin-bottom: 32px;
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+        color: white;
+    }
+
+    .profile-header-content {
+        display: flex;
+        align-items: center;
+        gap: 40px;
+    }
+
+    .profile-avatar-large {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+        font-weight: 700;
+        flex-shrink: 0;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .profile-info {
+        flex: 1;
+    }
+
+    .profile-username {
+        font-size: 32px;
+        font-weight: 700;
+        margin: 0 0 8px 0;
+        letter-spacing: -0.5px;
+    }
+
+    .profile-email {
+        font-size: 16px;
+        margin: 0 0 8px 0;
+        opacity: 0.9;
+    }
+
+    .profile-join-date {
+        font-size: 14px;
+        margin: 0 0 20px 0;
+        opacity: 0.85;
+    }
+
+    .profile-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-primary {
+        background-color: var(--accent-color);
+        color: var(--text-dark);
+    }
+
+    .btn-primary:hover {
+        background-color: #ffb300;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+    }
+
+    .btn-secondary {
+        background-color: rgba(255, 255, 255, 0.2);
+        border: 2px solid white;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background-color: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    /* ===== STATS SECTION ===== */
+    .profile-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 32px;
+    }
+
+    .stat-card {
+        background: white;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        padding: 24px;
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-card:hover {
+        border-color: var(--primary-color);
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+        transform: translateY(-4px);
+    }
+
+    .stat-number {
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 8px;
+    }
+
+    .stat-label {
+        font-size: 14px;
+        color: var(--text-light);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* ===== PROFILE SECTIONS ===== */
+    .profile-section {
+        background: white;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        padding: 32px;
+        margin-bottom: 24px;
+        transition: all 0.3s ease;
+    }
+
+    .profile-section:hover {
+        border-color: var(--primary-color);
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.1);
+    }
+
+    .section-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin: 0 0 24px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* ===== INTERESTS ===== */
+    .interests-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .interest-chip {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 24px;
+        font-weight: 600;
+        font-size: 14px;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .interest-chip:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
+    }
+
+    /* ===== DETAILS GRID ===== */
+    .details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+    }
+
+    .detail-item {
+        padding: 16px;
+        background-color: var(--bg-light);
+        border-radius: 8px;
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .detail-label {
+        display: block;
+        font-weight: 600;
+        color: var(--text-light);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 6px;
+    }
+
+    .detail-value {
+        display: block;
+        font-size: 15px;
+        color: var(--text-dark);
+        font-weight: 500;
+    }
+
+    .badge-active {
+        display: inline-block;
+        background-color: #c6f6d5;
+        color: #22543d;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .badge-inactive {
+        display: inline-block;
+        background-color: #fed7d7;
+        color: #742a2a;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    /* ===== ACTIVITY SECTION ===== */
+    .activity-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 20px;
+        background-color: var(--bg-light);
+        border-radius: 12px;
+        border: 2px solid var(--border-color);
+        transition: all 0.3s ease;
+    }
+
+    .activity-item:hover {
+        border-color: var(--primary-color);
+        background-color: #f0f4ff;
+        transform: translateX(4px);
+    }
+
+    .activity-icon {
+        font-size: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 60px;
+        height: 60px;
+        background: white;
+        border-radius: 12px;
+        flex-shrink: 0;
+    }
+
+    .activity-content h4 {
+        margin: 0 0 4px 0;
+        color: var(--text-dark);
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .activity-content p {
+        margin: 0;
+        color: var(--text-light);
+        font-size: 13px;
+    }
+
+    /* ===== EMPTY STATE ===== */
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        background-color: var(--bg-light);
+        border-radius: 12px;
+        border: 2px dashed var(--border-color);
+    }
+
+    .empty-state p {
+        color: var(--text-light);
+        font-size: 15px;
+        margin-bottom: 16px;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+        .profile-header-content {
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .profile-avatar-large {
+            width: 100px;
+            height: 100px;
+            font-size: 40px;
+        }
+
+        .profile-username {
+            font-size: 24px;
+        }
+
+        .profile-header {
+            padding: 30px;
+            margin-bottom: 24px;
+        }
+
+        .profile-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+            text-align: center;
+        }
+
+        .profile-stats {
+            grid-template-columns: 1fr;
+        }
+
+        .details-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .activity-stats {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
