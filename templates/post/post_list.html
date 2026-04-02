@@ -229,11 +229,35 @@
         border-left: 3px solid var(--primary-color);
     }
 
+    .comment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 4px;
+    }
+
     .comment-author {
         font-weight: 600;
         color: #2d3748;
         font-size: 13px;
-        margin-bottom: 4px;
+    }
+
+    .comment-like-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 12px;
+        color: #718096;
+        padding: 0;
+        transition: color 0.2s ease;
+    }
+
+    .comment-like-btn:hover {
+        color: #667eea;
+    }
+
+    .comment-like-btn.liked {
+        color: #667eea;
     }
 
     .comment-text {
@@ -464,7 +488,7 @@
         <div class="post-stats">
             <div class="post-stat-item">
                 <span>👍</span>
-                <span><strong>{{ post.like_set.count }}</strong> {{ post.like_set.count|pluralize:"Like,Likes" }}</span>
+                <span><strong>{{ post.get_like_count }}</strong> {{ post.get_like_count|pluralize:"Like,Likes" }}</span>
             </div>
 
             <div class="post-stat-item">
@@ -500,8 +524,22 @@
 
                 {% for comment in post.comments.all|slice:":3" %}
                     <div class="comment-item">
-                        <div class="comment-author">
-                            {{ comment.user.username }}
+                        <div class="comment-header">
+                            <div class="comment-author">
+                                {{ comment.user.username }}
+                            </div>
+                            <form method="post" action="{% url 'blog:comment_like' comment.id %}" style="display: inline;">
+                                {% csrf_token %}
+                                {% if comment.id in liked_comment_ids %}
+                                    <button type="submit" class="comment-like-btn liked" title="Unlike comment">
+                                        ❤️ {{ comment.get_like_count }}
+                                    </button>
+                                {% else %}
+                                    <button type="submit" class="comment-like-btn" title="Like comment">
+                                        🤍 {{ comment.get_like_count }}
+                                    </button>
+                                {% endif %}
+                            </form>
                         </div>
                         <p class="comment-text">{{ comment.content }}</p>
                     </div>

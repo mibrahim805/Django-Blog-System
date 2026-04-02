@@ -19,4 +19,5 @@ urlpatterns = [
     path('profile/', UserProfileView.as_view(), name='profile'),
     path('update_post/<int:pk>/', PostUpdateView.as_view(), name='update_post'),
     path('delete_post/<int:pk>/', PostDeleteView.as_view(), name='delete_post'),
+    path('comment/<int:comment_id>/like/', CommentLikeView.as_view(), name='comment_like')
 ]

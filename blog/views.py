@@ -93,6 +93,14 @@ class PostListView(LoginRequiredMixin, FilterView):
         selected_category_ids = [int(id) for id in self.request.GET.getlist("categories") if id and id != "all"]
         context["selected_category_ids"] = selected_category_ids
         
+        # Get liked post IDs for the current user (only post likes, not comment likes)
+        liked_posts = Like.objects.filter(user=self.request.user, comment__isnull=True).values_list('post_id', flat=True)
+        context["liked_post_ids"] = list(liked_posts)
+        
+        # Get liked comment IDs for the current user
+        liked_comments = Like.objects.filter(user=self.request.user, comment__isnull=False).values_list('comment_id', flat=True)
+        context["liked_comment_ids"] = list(liked_comments)
+        
         return context
 
 
@@ -244,4 +252,16 @@ class UserProfileView(LoginRequiredMixin, View):
 
 
 
+class CommentLikeView(LoginRequiredMixin, View):
+    def post(self, request, comment_id):
+        comment = get_object_or_404(Comment, id=comment_id)
+        like = Like.objects.filter(user=request.user, comment=comment).first()
+
+        if like:
+            like.delete()
+        else:
+            Like.objects.create(user=request.user, comment=comment)
+            if comment.user != request.user:
+                create_and_push_notification(user=comment.user,post=comment.post,sender=request.user,message=f"{request.user.username} liked your comment.",)
+        return redirect("blog:home")
 

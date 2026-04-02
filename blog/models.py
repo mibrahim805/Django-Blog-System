@@ -17,9 +17,11 @@ class Post(models.Model):
     is_published = models.BooleanField(default=False)
     category = models.ManyToManyField("Category", blank=True)
 
-
     def __str__(self):
         return self.title
+    
+    def get_like_count(self):
+        return self.like_set.filter(comment__isnull=True).count()
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
@@ -29,14 +31,18 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.content
+    
+    def get_like_count(self):
+        return self.like_set.filter(post__isnull=True).count()
 
 class Like(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, null=True, blank=True)
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('user', 'post')
+        unique_together = ('user', 'post', 'comment')
 
     def __str__(self):
         return str(self.user)
