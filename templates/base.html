@@ -89,6 +89,39 @@
 			font-size: 14px;
 		}
 
+		/* Global back button (shown under navbar) */
+		.global-back-wrap {
+			max-width: 1140px;
+			margin: 14px auto 0;
+			padding: 0 12px;
+		}
+
+		.global-back-btn {
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+			padding: 8px 12px;
+			border-radius: 10px;
+			border: 1px solid #dbe2ef;
+			background: #ffffff;
+			color: #374151;
+			font-weight: 600;
+			font-size: 13px;
+			line-height: 1;
+			cursor: pointer;
+			transition: all 0.2s ease;
+		}
+
+		.global-back-btn:hover {
+			border-color: var(--primary-color);
+			color: var(--primary-color);
+			box-shadow: 0 4px 14px rgba(102, 126, 234, 0.14);
+		}
+
+		.global-back-btn[hidden] {
+			display: none;
+		}
+
 		/* Scroll bar styling */
 		::-webkit-scrollbar {
 			width: 8px;
@@ -134,6 +167,11 @@
 				font-size: 13px;
 				margin-top: 8px;
 			}
+
+			.global-back-wrap {
+				margin-top: 10px;
+				padding: 0 10px;
+			}
 		}
 	</style>
 
@@ -143,6 +181,13 @@
 
 	<!-- Navigation Bar -->
 	{% include "includes/navbar.html" %}
+
+	<div class="global-back-wrap">
+		<button id="global-back-btn" class="global-back-btn" type="button" aria-label="Go back" hidden>
+			<span aria-hidden="true">&larr;</span>
+			<span>Back</span>
+		</button>
+	</div>
 
 
 	<!-- Main Content -->
@@ -173,6 +218,17 @@
 	<!-- Notifications Script -->
 	<script>
 		document.addEventListener("DOMContentLoaded", function () {
+			const backBtn = document.getElementById("global-back-btn");
+			if (backBtn) {
+				const hasReferrer = document.referrer && document.referrer !== window.location.href;
+				if (window.history.length > 1 || hasReferrer) {
+					backBtn.hidden = false;
+					backBtn.addEventListener("click", function () {
+						window.history.back();
+					});
+				}
+			}
+
 			const isAuthenticated = document.body.dataset.authenticated === "1";
 			if (!isAuthenticated) return;
 

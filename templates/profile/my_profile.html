@@ -33,18 +33,18 @@
 
     <!-- Stats Section -->
     <div class="profile-stats">
-        <div class="stat-card">
+        <a href="{% url 'blog:my_posts' %}" class="stat-card stat-card-link" aria-label="Open my published posts">
             <div class="stat-number">{{ user_posts }}</div>
             <div class="stat-label">Posts Published</div>
-        </div>
-        <div class="stat-card">
+        </a>
+        <a href="{% url 'blog:followers_list' user.id %}" class="stat-card stat-card-link" aria-label="Open followers list">
             <div class="stat-number">{{ followers_count }}</div>
             <div class="stat-label">Followers</div>
-        </div>
-        <div class="stat-card">
+        </a>
+        <a href="{% url 'blog:following_list' user.id %}" class="stat-card stat-card-link" aria-label="Open following list">
             <div class="stat-number">{{ following_count }}</div>
             <div class="stat-label">Following</div>
-        </div>
+        </a>
     </div>
 
     <!-- Interests Section -->
@@ -352,10 +352,21 @@
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 
+    .stat-card-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
     .stat-card:hover {
         border-color: var(--primary-color);
         box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
         transform: translateY(-4px);
+    }
+
+    .stat-card-link:focus-visible {
+        outline: 3px solid rgba(102, 126, 234, 0.35);
+        outline-offset: 2px;
     }
 
     .stat-number {

@@ -445,6 +445,47 @@
         margin-top: 24px;
         padding-top: 20px;
         border-top: 2px solid var(--border-color);
+        display: none;
+        max-height: 600px;
+        overflow-y: auto;
+        animation: slideDown 0.3s ease-out;
+    }
+
+    .comments-section.show {
+        display: block;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            max-height: 0;
+        }
+        to {
+            opacity: 1;
+            max-height: 600px;
+        }
+    }
+
+    .comments-toggle-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #f0f4f8;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-bottom: 14px;
+    }
+
+    .comments-toggle-btn:hover {
+        background: #e8ecf4;
+        border-color: var(--primary-color);
+        color: var(--primary-color);
     }
 
     .comments-title {
@@ -811,53 +852,70 @@
 
         <!-- Actions -->
         <div class="post-actions">
-            <form method="post" action="{% url 'blog:like_post' post.id %}" style="flex: 1;">
+            <form method="post" action="{% url 'blog:like_post' post.id %}" style="flex: 1;" onsubmit="return handlePostLike(event, {{ post.id }})">
                 {% csrf_token %}
-                {% if post.id in liked_post_ids %}
-                    <button type="submit" class="post-action-btn liked">
+                <button type="submit" class="post-action-btn{% if post.id in liked_post_ids %} liked{% endif %}" id="like-btn-{{ post.id }}" {% if post.id in liked_post_ids %}data-liked="true"{% else %}data-liked="false"{% endif %}>
+                    {% if post.id in liked_post_ids %}
                         <i class="fas fa-heart"></i> Unlike
-                    </button>
-                {% else %}
-                    <button type="submit" class="post-action-btn">
+                    {% else %}
                         <i class="far fa-heart"></i> Like
-                    </button>
-                {% endif %}
+                    {% endif %}
+                </button>
             </form>
-            <a href="{% url 'blog:create_comment' post.id %}" class="post-action-btn">
+            <button type="button" class="post-action-btn" onclick="toggleCommentForm({{ post.id }})">
                 <i class="fas fa-comment"></i> Comment
-            </a>
+            </button>
         </div>
+
+        <!-- Comment Form (inline, hidden) -->
+        <div id="comment-form-{{ post.id }}" style="display: none; margin: 16px 0; padding: 14px; background: #f8fafc; border-radius: 8px;">
+            <form onsubmit="handleCommentSubmit(event, {{ post.id }})">
+                {% csrf_token %}
+                <textarea class="form-control" placeholder="Write your comment..." required style="margin-bottom: 10px; border-radius: 8px; padding: 10px 12px; border: 1px solid var(--border-color);"></textarea>
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" class="btn-not-interested-submit" style="flex: 1; margin: 0; padding: 8px 12px;">Post Comment</button>
+                    <button type="button" class="btn-not-interested-cancel" style="flex: 1; margin: 0; padding: 8px 12px;" onclick="toggleCommentForm({{ post.id }})">Cancel</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Comments Toggle Button -->
+        {% if post.comments.exists %}
+            <button type="button" class="comments-toggle-btn" onclick="toggleComments({{ post.id }})" id="toggle-btn-{{ post.id }}">
+                <i class="fas fa-chevron-down"></i>
+                <span>Show Comments ({{ post.comments.count }})</span>
+            </button>
+        {% endif %}
 
         <!-- Comments Section -->
         {% if post.comments.exists %}
-        <div class="comments-section">
+        <div class="comments-section" id="comments-section-{{ post.id }}">
             <div class="comments-title">
-                <i class="fas fa-comments"></i> Recent Comments
+                <i class="fas fa-comments"></i> All Comments ({{ post.comments.count }})
             </div>
 
-            {% for comment in post.comments.all|slice:":3" %}
-            <div class="comment-item">
+            {% for comment in post.comments.all %}
+            <div class="comment-item" id="comment-{{ comment.id }}">
                 <div class="comment-header">
                     <div class="comment-author">
                         <i class="fas fa-user-circle"></i> {{ comment.user.username }}
                     </div>
                     <div class="comment-actions">
                         <!-- Like Comment -->
-                        <form method="post" action="{% url 'blog:comment_like' comment.id %}" style="display: inline;">
+                        <form method="post" action="{% url 'blog:comment_like' comment.id %}" style="display: inline;" onsubmit="return handleCommentLike(event, {{ comment.id }})">
                             {% csrf_token %}
-                            {% if comment.id in liked_comment_ids %}
-                                <button type="submit" class="comment-like-btn liked" title="Unlike">
-                                    <i class="fas fa-heart"></i> {{ comment.get_like_count }}
-                                </button>
-                            {% else %}
-                                <button type="submit" class="comment-like-btn" title="Like">
-                                    <i class="far fa-heart"></i> {{ comment.get_like_count }}
-                                </button>
-                            {% endif %}
+                            <button type="submit" class="comment-like-btn{% if comment.id in liked_comment_ids %} liked{% endif %}" id="comment-like-{{ comment.id }}" {% if comment.id in liked_comment_ids %}data-liked="true"{% else %}data-liked="false"{% endif %} title="Like">
+                                {% if comment.id in liked_comment_ids %}
+                                    <i class="fas fa-heart"></i>
+                                {% else %}
+                                    <i class="far fa-heart"></i>
+                                {% endif %}
+                                <span id="like-count-{{ comment.id }}">{{ comment.get_like_count }}</span>
+                            </button>
                         </form>
 
                         <!-- Reply -->
-                        <button class="comment-action-btn" onclick="openReplyModal({{ comment.id }})" title="Reply">
+                        <button class="comment-action-btn" onclick="toggleReplyForm({{ comment.id }})" title="Reply">
                             <i class="fas fa-reply"></i> Reply
                         </button>
 
@@ -877,6 +935,18 @@
                 <p class="comment-text">{{ comment.content }}</p>
                 <div class="comment-meta">
                     <i class="fas fa-clock"></i> {{ comment.created_at|date:"M d, Y - H:i" }}
+                </div>
+
+                <!-- Reply Form (hidden) -->
+                <div id="reply-form-{{ comment.id }}" style="display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-color);">
+                    <form onsubmit="handleReplySubmit(event, {{ comment.id }})">
+                        {% csrf_token %}
+                        <textarea class="form-control" placeholder="Write your reply..." required style="margin-bottom: 8px; border-radius: 8px; padding: 8px 10px; border: 1px solid var(--border-color); font-size: 13px;" rows="2"></textarea>
+                        <div style="display: flex; gap: 8px;">
+                            <button type="submit" class="btn-not-interested-submit" style="flex: 1; padding: 6px 10px; font-size: 12px; margin: 0;">Reply</button>
+                            <button type="button" class="btn-not-interested-cancel" style="flex: 1; padding: 6px 10px; font-size: 12px; margin: 0;" onclick="toggleReplyForm({{ comment.id }})">Cancel</button>
+                        </div>
+                    </form>
                 </div>
             </div>
             {% endfor %}
@@ -1062,6 +1132,195 @@
             closeAllPostMenus();
         }
     });
+
+    // ==== AJAX Handlers ====
+
+    function toggleComments(postId) {
+        const section = document.getElementById('comments-section-' + postId);
+        const btn = document.getElementById('toggle-btn-' + postId);
+        if (section) {
+            section.classList.toggle('show');
+            const icon = btn.querySelector('i');
+            if (section.classList.contains('show')) {
+                icon.className = 'fas fa-chevron-up';
+                btn.querySelector('span').textContent = 'Hide Comments';
+            } else {
+                icon.className = 'fas fa-chevron-down';
+                btn.querySelector('span').textContent = 'Show Comments';
+            }
+        }
+    }
+
+    function toggleCommentForm(postId) {
+        const form = document.getElementById('comment-form-' + postId);
+        if (form) {
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            if (form.style.display === 'block') {
+                form.querySelector('textarea').focus();
+            }
+        }
+    }
+
+    function handleCommentSubmit(e, postId) {
+        e.preventDefault();
+        const form = e.target;
+        const textarea = form.querySelector('textarea');
+        const content = textarea.value.trim();
+
+        if (!content) return;
+
+        const formData = new FormData();
+        formData.append('content', content);
+
+        fetch("{% url 'blog:create_comment' 0 %}".replace('0', postId), {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+            body: formData,
+        })
+        .then(r => {
+            console.log('Response status:', r.status);
+            return r.json();
+        })
+        .then(data => {
+            console.log('Response data:', data);
+            if (data.success) {
+                textarea.value = '';
+                toggleCommentForm(postId);
+                // Reload to show new comment
+                setTimeout(() => location.reload(), 500);
+            } else {
+                alert('Error posting comment: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(err => {
+            console.error('Fetch error:', err);
+            alert('Error posting comment');
+        });
+    }
+
+    function getCsrfToken() {
+        const tokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (tokenInput && tokenInput.value) {
+            return tokenInput.value;
+        }
+        const match = document.cookie.match(/(?:^|; )csrftoken=([^;]+)/);
+        return match ? decodeURIComponent(match[1]) : '';
+    }
+
+    function handlePostLike(e, postId) {
+        e.preventDefault();
+        const form = e.target;
+        const btn = document.getElementById('like-btn-' + postId);
+
+        fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': getCsrfToken(),
+            },
+            credentials: 'same-origin',
+            body: new FormData(form),
+        })
+        .then(r => r.json())
+        .then(data => {
+            console.log('Like response:', data);
+            if (data.success) {
+                const liked = data.is_liked;
+                btn.setAttribute('data-liked', liked ? 'true' : 'false');
+                btn.innerHTML = liked
+                    ? '<i class="fas fa-heart"></i> Unlike'
+                    : '<i class="far fa-heart"></i> Like';
+                btn.classList.toggle('liked', liked);
+            }
+        })
+        .catch(err => console.error('Like error:', err));
+        return false;
+    }
+
+    function handleCommentLike(e, commentId) {
+        e.preventDefault();
+        const form = e.target;
+        const btn = document.getElementById('comment-like-' + commentId);
+
+        fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': getCsrfToken(),
+            },
+            credentials: 'same-origin',
+            body: new FormData(form),
+        })
+        .then(r => r.json())
+        .then(data => {
+            console.log('Comment like response:', data);
+            if (data.success) {
+                const liked = data.is_liked;
+                btn.setAttribute('data-liked', liked ? 'true' : 'false');
+                const countEl = document.getElementById('like-count-' + commentId);
+                if (countEl) {
+                    countEl.textContent = data.like_count;
+                }
+                btn.innerHTML = liked
+                    ? '<i class="fas fa-heart"></i> <span id="like-count-' + commentId + '">' + data.like_count + '</span>'
+                    : '<i class="far fa-heart"></i> <span id="like-count-' + commentId + '">' + data.like_count + '</span>';
+                btn.classList.toggle('liked', liked);
+            }
+        })
+        .catch(err => console.error('Comment like error:', err));
+        return false;
+    }
+
+    function toggleReplyForm(commentId) {
+        const form = document.getElementById('reply-form-' + commentId);
+        if (form) {
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            if (form.style.display === 'block') {
+                form.querySelector('textarea').focus();
+            }
+        }
+    }
+
+    function handleReplySubmit(e, commentId) {
+        e.preventDefault();
+        const form = e.target;
+        const textarea = form.querySelector('textarea');
+        const content = textarea.value.trim();
+
+        if (!content) return;
+
+        const formData = new FormData();
+        formData.append('content', content);
+
+        fetch("{% url 'blog:comment_reply' 0 %}".replace('0', commentId), {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+            body: formData,
+        })
+        .then(r => r.json())
+        .then(data => {
+            console.log('Reply response:', data);
+            if (data.success) {
+                textarea.value = '';
+                toggleReplyForm(commentId);
+                // Reload to show new reply
+                setTimeout(() => location.reload(), 500);
+            } else {
+                alert('Error posting reply');
+            }
+        })
+        .catch(err => {
+            console.error('Reply error:', err);
+            alert('Error posting reply');
+        });
+    }
+
 
     // Reset modals on hide
     document.getElementById('replyModal').addEventListener('hidden.bs.modal', function() {

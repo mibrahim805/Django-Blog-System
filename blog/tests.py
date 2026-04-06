@@ -59,3 +59,19 @@ class PostEngagementTests(TestCase):
 		count_response_after_open = self.client.get(reverse("blog:notifications_unread_count"))
 		self.assertEqual(count_response_after_open.json()["unread_count"], 0)
 
+
+class AuthBackendTests(TestCase):
+	def setUp(self):
+		self.user = CustomUser.objects.create_user(
+			username="reader2",
+			email="reader2@example.com",
+			password="pass12345",
+		)
+
+	def test_login_with_username(self):
+		self.assertTrue(self.client.login(username="reader2", password="pass12345"))
+
+	def test_login_with_email(self):
+		self.assertTrue(self.client.login(username="reader2@example.com", password="pass12345"))
+
+

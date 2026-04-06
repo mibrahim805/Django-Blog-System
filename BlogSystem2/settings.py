@@ -120,6 +120,11 @@ USE_TZ = True
 
 AUTH_USER_MODEL = 'blog.CustomUser'
 
+AUTHENTICATION_BACKENDS = [
+    'blog.backends.EmailOrUsernameBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 LOGIN_URL = 'blog:login'
 LOGIN_REDIRECT_URL = '/post_list/'
 LOGOUT_REDIRECT_URL = 'blog:login'
