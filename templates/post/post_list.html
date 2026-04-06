@@ -2,6 +2,8 @@
 
 {% block content %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <style>
     :root {
         --primary-color: #667eea;
@@ -9,46 +11,94 @@
         --light-bg: #f8f9fa;
         --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
         --hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        --border-color: #e2e8f0;
+        --text-primary: #1a202c;
+        --text-secondary: #718096;
+        --success-color: #48bb78;
+        --warning-color: #ed8936;
+        --danger-color: #f56565;
+    }
+
+    * {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
     }
 
     body {
-        background-color: var(--light-bg);
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
     }
 
     .posts-container {
-        max-width: 800px;
+        max-width: 900px;
         margin: 0 auto;
-        padding: 20px;
+        padding: 40px 20px;
     }
 
     .page-header {
         display: flex;
-        justify-content: flex-start;
+        justify-content: space-between;
         align-items: center;
         margin-bottom: 40px;
-        padding-bottom: 20px;
-        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 24px;
+        border-bottom: 2px solid var(--border-color);
+        flex-wrap: wrap;
+        gap: 20px;
     }
 
     .page-header h1 {
-        font-size: 32px;
-        font-weight: 700;
-        color: #2d3748;
+        font-size: 36px;
+        font-weight: 800;
+        color: var(--text-primary);
         margin: 0;
+        letter-spacing: -0.5px;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
     }
 
     .btn-custom {
-        padding: 10px 20px;
+        padding: 12px 24px;
         border-radius: 8px;
         font-weight: 600;
         border: none;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         text-decoration: none;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 6px;
+        gap: 8px;
+        font-size: 14px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-create {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+    }
+
+    .btn-create:hover {
+        color: white;
+        opacity: 0.95;
+    }
+
+    .btn-my-posts {
+        background: white;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+    }
+
+    .btn-my-posts:hover {
+        background: var(--primary-color);
+        color: white;
     }
 
     .post-card {
@@ -57,7 +107,8 @@
         padding: 24px;
         margin-bottom: 24px;
         box-shadow: var(--card-shadow);
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid var(--border-color);
     }
 
     .post-card:hover {
@@ -70,17 +121,37 @@
         align-items: center;
         justify-content: space-between;
         margin-bottom: 16px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--border-color);
     }
 
     .post-author-info {
         display: flex;
         align-items: center;
         gap: 12px;
+        flex: 1;
+    }
+
+    .author-profile-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex: 1;
+        text-decoration: none;
+        color: inherit;
+        padding: 4px 0;
+        transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .author-profile-link:hover {
+        color: inherit;
+        transform: translateX(2px);
+        opacity: 0.95;
     }
 
     .post-author-avatar {
-        width: 40px;
-        height: 40px;
+        width: 48px;
+        height: 48px;
         border-radius: 50%;
         background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
         display: flex;
@@ -88,36 +159,195 @@
         justify-content: center;
         color: white;
         font-weight: 700;
-        font-size: 16px;
+        font-size: 18px;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+
+    .post-author-details {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .author-label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        margin-bottom: 2px;
     }
 
     .post-author-details strong {
         display: block;
-        font-size: 15px;
-        color: #2d3748;
+        font-size: 16px;
+        color: var(--text-primary);
         margin-bottom: 2px;
+        font-weight: 600;
     }
 
     .post-author-details small {
-        color: #718096;
+        color: var(--text-secondary);
         font-size: 12px;
     }
 
+    .author-link-indicator {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: #f8f9ff;
+        color: var(--primary-color);
+        border: 1px solid var(--border-color);
+        flex-shrink: 0;
+    }
+
+    .post-options {
+        position: relative;
+        margin-left: 12px;
+    }
+
+    .post-options-toggle {
+        width: 36px;
+        height: 36px;
+        border: 1px solid var(--border-color);
+        border-radius: 50%;
+        background: white;
+        color: var(--text-secondary);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .post-options-toggle:hover {
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+        background: #f8f9ff;
+    }
+
+    .post-options-menu {
+        position: absolute;
+        top: 42px;
+        right: 0;
+        min-width: 220px;
+        background: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16);
+        padding: 8px;
+        z-index: 10;
+        display: none;
+    }
+
+    .post-options-menu.show {
+        display: block;
+    }
+
+    .post-menu-item {
+        width: 100%;
+        border: none;
+        background: transparent;
+        border-radius: 8px;
+        padding: 10px 12px;
+        text-align: left;
+        color: var(--text-primary);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .post-menu-item:hover {
+        background: #f8f9ff;
+        color: var(--primary-color);
+    }
+
+    .not-interested-form {
+        display: none;
+        margin: -2px 0 18px;
+        background: #f8fafc;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: 14px;
+    }
+
+    .not-interested-form.show {
+        display: block;
+    }
+
+    .not-interested-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .btn-not-interested-submit,
+    .btn-not-interested-cancel {
+        border: none;
+        border-radius: 8px;
+        padding: 9px 14px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .btn-not-interested-submit {
+        color: white;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    }
+
+    .btn-not-interested-cancel {
+        color: #475569;
+        background: #e2e8f0;
+    }
+
     .post-title {
-        font-size: 22px;
+        font-size: 24px;
         font-weight: 700;
-        color: #2d3748;
-        margin: 16px 0 12px 0;
+        color: var(--text-primary);
+        margin: 20px 0 12px 0;
         line-height: 1.4;
+        letter-spacing: -0.3px;
+    }
+
+    .post-title:hover {
+        color: var(--primary-color);
+        transition: color 0.2s ease;
+    }
+
+    .post-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 13px;
+    }
+
+    .post-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--text-secondary);
+    }
+
+    .post-meta-item i {
+        color: var(--primary-color);
     }
 
     .post-content {
-        color: #4a5568;
+        color: var(--text-secondary);
         font-size: 15px;
-        line-height: 1.6;
-        margin-bottom: 16px;
+        line-height: 1.7;
+        margin-bottom: 20px;
+        text-align: justify;
     }
-
 
     .post-category {
         margin-bottom: 12px;
@@ -125,29 +355,38 @@
 
     .category-chip {
         display: inline-block;
-        background: #eef2ff;
+        background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
         color: #4338ca;
         border: 1px solid #c7d2fe;
         font-size: 12px;
         font-weight: 600;
-        padding: 5px 10px;
-        border-radius: 999px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        margin-right: 6px;
+        margin-bottom: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .category-chip:hover {
+        background: linear-gradient(135deg, #c7d2fe 0%, #a5b4fc 100%);
+        color: white;
+        transform: scale(1.05);
     }
 
     .category-chip.empty {
         background: #f3f4f6;
-        color: #4b5563;
+        color: #6b7280;
         border-color: #e5e7eb;
     }
 
     .post-stats {
         display: flex;
         gap: 20px;
-        color: #718096;
+        color: var(--text-secondary);
         font-size: 14px;
-        padding: 12px 0;
-        border-top: 1px solid #e2e8f0;
-        border-bottom: 1px solid #e2e8f0;
+        padding: 16px 0;
+        border-top: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-color);
         margin: 16px 0;
     }
 
@@ -155,18 +394,23 @@
         display: flex;
         align-items: center;
         gap: 6px;
+        font-weight: 600;
+    }
+
+    .post-stat-item i {
+        color: var(--primary-color);
     }
 
     .post-actions {
         display: flex;
         gap: 10px;
-        margin: 16px 0;
+        margin: 20px 0;
     }
 
     .post-action-btn {
         flex: 1;
-        padding: 10px 14px;
-        border: none;
+        padding: 12px 16px;
+        border: 2px solid var(--border-color);
         border-radius: 8px;
         font-size: 14px;
         font-weight: 600;
@@ -175,71 +419,89 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 6px;
+        gap: 8px;
         text-decoration: none;
+        background: white;
+        color: var(--text-primary);
     }
 
-    .btn-like {
-        background-color: #e2e8f0;
-        color: #4a5568;
+    .post-action-btn:hover {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        background: #f8f9ff;
     }
 
-    .btn-like:hover {
-        background-color: #cbd5e0;
-    }
-
-    .btn-like.liked {
-        background-color: #667eea;
+    .post-action-btn.liked {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
         color: white;
+        border: none;
     }
 
-    .btn-like.liked:hover {
-        background-color: #5568d3;
-    }
-
-    .btn-comment {
-        background-color: #e2e8f0;
-        color: #4a5568;
-    }
-
-    .btn-comment:hover {
-        background-color: #cbd5e0;
+    .post-action-btn.liked:hover {
+        opacity: 0.9;
     }
 
     .comments-section {
-        margin-top: 20px;
-        padding-top: 16px;
-        border-top: 2px solid #e2e8f0;
+        margin-top: 24px;
+        padding-top: 20px;
+        border-top: 2px solid var(--border-color);
     }
 
     .comments-title {
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 700;
-        color: #2d3748;
-        margin-bottom: 12px;
+        color: var(--text-primary);
+        margin-bottom: 16px;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.8px;
     }
 
     .comment-item {
-        background-color: #f7fafc;
-        padding: 12px 14px;
+        background-color: #f8fafc;
+        padding: 14px 16px;
         border-radius: 8px;
-        margin-bottom: 8px;
-        border-left: 3px solid var(--primary-color);
+        margin-bottom: 12px;
+        border-left: 4px solid var(--primary-color);
+        transition: all 0.2s ease;
+    }
+
+    .comment-item:hover {
+        background-color: #f0f4f8;
     }
 
     .comment-header {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        margin-bottom: 4px;
+        margin-bottom: 8px;
     }
 
     .comment-author {
         font-weight: 600;
-        color: #2d3748;
-        font-size: 13px;
+        color: var(--text-primary);
+        font-size: 14px;
+    }
+
+    .comment-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .comment-action-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 12px;
+        color: #718096;
+        padding: 0 4px;
+        transition: color 0.2s ease;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .comment-action-btn:hover {
+        color: #667eea;
     }
 
     .comment-like-btn {
@@ -250,6 +512,7 @@
         color: #718096;
         padding: 0;
         transition: color 0.2s ease;
+        font-weight: 500;
     }
 
     .comment-like-btn:hover {
@@ -262,237 +525,286 @@
 
     .comment-text {
         color: #4a5568;
-        font-size: 13px;
-        line-height: 1.5;
+        font-size: 14px;
+        line-height: 1.6;
         margin: 0;
+    }
+
+    .comment-meta {
+        font-size: 11px;
+        color: #a0aec0;
+        margin-top: 6px;
+    }
+
+    /* Modal Styles */
+    .modal-content {
+        border: none;
+        border-radius: 12px;
+        box-shadow: var(--hover-shadow);
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        border: none;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .modal-header .btn-close {
+        filter: brightness(0) invert(1);
+    }
+
+    .modal-title {
+        font-weight: 700;
+        font-size: 18px;
+    }
+
+    .btn-modal-action {
+        padding: 10px 16px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-modal-submit {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+    }
+
+    .btn-modal-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-modal-cancel {
+        background-color: #e2e8f0;
+        color: #4a5568;
+    }
+
+    .btn-modal-cancel:hover {
+        background-color: #cbd5e0;
+    }
+
+    .btn-modal-danger {
+        background-color: #f56565;
+        color: white;
+    }
+
+    .btn-modal-danger:hover {
+        background-color: #e53e3e;
+    }
+
+    .form-control {
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 14px;
+        transition: all 0.2s ease;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+        font-size: 14px;
     }
 
     .empty-state {
         text-align: center;
         padding: 60px 20px;
-        color: #718096;
+        color: var(--text-secondary);
     }
 
     .empty-state-icon {
-        font-size: 48px;
+        font-size: 64px;
         margin-bottom: 16px;
+        opacity: 0.8;
+    }
+
+    .empty-state h3 {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 8px;
     }
 
     .empty-state p {
-        font-size: 18px;
+        font-size: 16px;
         margin: 0;
     }
 
-    @media (max-width: 600px) {
+    .empty-state-actions {
+        margin-top: 24px;
+    }
+
+    .empty-state-actions a {
+        display: inline-block;
+        padding: 12px 24px;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .empty-state-actions a:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    @media (max-width: 768px) {
+        .posts-container {
+            padding: 20px 16px;
+        }
+
         .page-header {
             flex-direction: column;
-            align-items: flex-start;
-            gap: 16px;
+            align-items: stretch;
+            gap: 12px;
+        }
+
+        .page-header h1 {
+            font-size: 28px;
+        }
+
+        .header-actions {
+            width: 100%;
         }
 
         .btn-custom {
-            width: 100%;
+            flex: 1;
             justify-content: center;
         }
 
         .post-title {
-            font-size: 18px;
+            font-size: 20px;
         }
 
         .post-actions {
             flex-direction: column;
         }
 
-        .post-stat-item {
-            flex-wrap: wrap;
+        .post-action-btn {
+            flex: 1 1 auto;
         }
 
-        .filter-actions {
-            flex-direction: column;
-        }
-
-        .filter-actions .btn-custom {
-            width: 100%;
-            justify-content: center;
-        }
-
-        .filters-header {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .filters-title {
-            font-size: 14px;
-        }
-
-        .filters-panel {
+        .post-card {
             padding: 16px;
+        }
+
+        .comment-actions {
+            flex-wrap: wrap;
         }
     }
 </style>
-{##}
-{#<div class="posts-container">#}
-{#    <!-- Page Header -->#}
-{#    <div class="page-header">#}
-{#        <h1>📝 All Posts</h1>#}
-{#        <div class="header-actions">#}
-{#            <a href="{% url 'blog:my_posts' %}" class="btn-custom btn-my-posts">My Posts</a>#}
-{#            <a href="{% url 'blog:create_post' %}" class="btn-custom btn-create">#}
-{#                ➕ Create Post#}
-{#            </a>#}
-{#        </div>#}
-{#    </div>#}
-{##}
-{#    <div class="filters-panel">#}
-{#        <div class="filters-title">Filter by Categories</div>#}
-{#        <form method="get">#}
-{#            <select name="categories" multiple class="category-select">#}
-{#                {% for category in all_categories %}#}
-{#                    <option value="{{ category.id }}" {% if category.id in selected_category_ids %}selected{% endif %}>#}
-{#                        {{ category.name }}#}
-{#                    </option>#}
-{#                {% endfor %}#}
-{#            </select>#}
-{#            <div class="filter-actions">#}
-{#                <button type="submit" class="btn-custom btn-filter">Apply Filter</button>#}
-{#                <a href="{% url 'blog:home' %}" class="btn-custom btn-clear">Clear</a>#}
-{#            </div>#}
-{#        </form>#}
-{#    </div>#}
-{##}
-{#    <!-- Posts List -->#}
-{#    {% for post in posts %}#}
-{#        <div class="post-card">#}
-{#            <!-- Post Header with Author -->#}
-{#            <div class="post-header">#}
-{#                <div class="post-author-info">#}
-{#                    <div class="post-author-avatar">#}
-{#                        {{ post.author.username|first|upper }}#}
-{#                    </div>#}
-{#                    <div class="post-author-details">#}
-{#                        <strong>{{ post.author.username }}</strong>#}
-{#                        <small>{{ post.created_at|date:"M d, Y" }}</small>#}
-{#                    </div>#}
-{#                </div>#}
-{#            </div>#}
-{##}
-{#            <!-- Post Content -->#}
-{#            <h3 class="post-title">{{ post.title }}</h3>#}
-{#            <div class="post-category">#}
-{#                {% if post.category %}#}
-{#                    <span class="category-chip">Category: {{ post.category.name }}</span>#}
-{#                {% else %}#}
-{#                    <span class="category-chip empty">Category: Uncategorized</span>#}
-{#                {% endif %}#}
-{#            </div>#}
-{#            <p class="post-content">{{ post.content }}</p>#}
-{##}
-{#            <!-- Post Stats -->#}
-{#            <div class="post-stats">#}
-{#                <div class="post-stat-item">#}
-{#                    <span>👍</span>#}
-{#                    <span><strong>{{ post.like_set.count }}</strong> {{ post.like_set.count|pluralize:"Like,Likes" }}</span>#}
-{#                </div>#}
-{#                <div class="post-stat-item">#}
-{#                    <span>💬</span>#}
-{#                    <span><strong>{{ post.comments.count }}</strong> {{ post.comments.count|pluralize:"Comment,Comments" }}</span>#}
-{#                </div>#}
-{#            </div>#}
-{##}
-{#            <!-- Post Actions -->#}
-{#            <div class="post-actions">#}
-{#                <form method="post" action="{% url 'blog:like_post' post.id %}" style="flex: 1;">#}
-{#                    {% csrf_token %}#}
-{#                    {% if post.id in liked_post_ids %}#}
-{#                        <button type="submit" class="post-action-btn btn-like liked">#}
-{#                            👍 Unlike#}
-{#                        </button>#}
-{#                    {% else %}#}
-{#                        <button type="submit" class="post-action-btn btn-like">#}
-{#                            👍 Like#}
-{#                        </button>#}
-{#                    {% endif %}#}
-{#                </form>#}
-{#                <a href="{% url 'blog:create_comment' post.id %}" class="post-action-btn btn-comment">#}
-{#                    💬 Comment#}
-{#                </a>#}
-{#            </div>#}
-{##}
-{#            <!-- Comments Section -->#}
-{#            {% if post.comments.all %}#}
-{#                <div class="comments-section">#}
-{#                    <div class="comments-title">Recent Comments</div>#}
-{#                    {% for comment in post.comments.all|slice:":3" %}#}
-{#                        <div class="comment-item">#}
-{#                            <div class="comment-author">{{ comment.user.username }}</div>#}
-{#                            <p class="comment-text">{{ comment.content }}</p>#}
-{#                        </div>#}
-{#                    {% endfor %}#}
-{#                </div>#}
-{#            {% endif %}#}
-{#        </div>#}
-{#    {% empty %}#}
-{#        <div class="empty-state">#}
-{#            <div class="empty-state-icon">📭</div>#}
-{#            <p>No posts available yet. Be the first to create one!</p>#}
-{#        </div>#}
-{#    {% endfor %}#}
-{#</div>#}
-{##}
-{#<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>#}
-{#{% endblock %}#}
 <div class="posts-container">
-
-<!-- Page Header -->
-<div class="page-header">
-    <h1>📄 All Posts</h1>
-</div>
-
-
-<!-- Posts List -->
-{% for post in posts %}
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1><i class="fas fa-newspaper"></i> All Posts</h1>
+        <div class="header-actions">
+            <!-- Buttons removed -->
+        </div>
+    </div>
+    <!-- Posts List -->
+    {% for post in posts %}
     <div class="post-card">
-
         <!-- Post Header -->
         <div class="post-header">
-            <div class="post-author-info">
-                <div class="post-author-avatar">
+            <a
+                href="{% if post.author_id == request.user.id %}{% url 'blog:profile' %}{% else %}{% url 'blog:other_profile' post.author.id %}{% endif %}"
+                class="author-profile-link"
+                title="View {{ post.author.username }}'s profile"
+                aria-label="View {{ post.author.username }}'s profile"
+            >
+                <div class="post-author-avatar" aria-hidden="true">
                     {{ post.author.username|first|upper }}
                 </div>
                 <div class="post-author-details">
-                    <strong>{{ post.author.username }}</strong>
-                    <small>{{ post.created_at|date:"M d, Y" }}</small>
+                    <span class="author-label">Author</span>
+                    <strong>{{ post.author.get_full_name|default:post.author.username }}</strong>
+                    <small>@{{ post.author.username }} · {{ post.created_at|date:"M d, Y" }}</small>
+                </div>
+                <span class="author-link-indicator" aria-hidden="true">
+                    <i class="fas fa-arrow-right"></i>
+                </span>
+            </a>
+            <div class="post-options">
+                <button
+                    type="button"
+                    class="post-options-toggle"
+                    onclick="togglePostMenu({{ post.id }})"
+                    aria-label="Post options"
+                >
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+                <div id="post-menu-{{ post.id }}" class="post-options-menu">
+                    <button type="button" class="post-menu-item" onclick="toggleNotInterestedForm({{ post.id }})">
+                        <i class="fas fa-eye-slash"></i>
+                        Not interested
+                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- Post Content -->
+        <div id="not-interested-form-{{ post.id }}" class="not-interested-form">
+            <form method="post" action="{% url 'blog:mark_not_interested' post.id %}">
+                {% csrf_token %}
+                <label for="notInterestedReason{{ post.id }}" class="form-label">Reason</label>
+                <textarea
+                    id="notInterestedReason{{ post.id }}"
+                    name="reason"
+                    class="form-control"
+                    rows="3"
+                    maxlength="400"
+                    placeholder="Why is this post not relevant for you?"
+                    required
+                ></textarea>
+                <div class="not-interested-actions">
+                    <button type="submit" class="btn-not-interested-submit">Submit reason</button>
+                    <button type="button" class="btn-not-interested-cancel" onclick="cancelNotInterestedForm({{ post.id }})">Cancel</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Post Title -->
         <h3 class="post-title">{{ post.title }}</h3>
 
-        <!-- Categories (FIXED) -->
+        <!-- Categories -->
         <div class="post-category">
             {% if post.categories.exists %}
-                <span class="category-chip">
-                    {% for category in post.categories.all %}
-                        {{ category.name }}{% if not forloop.last %}, {% endif %}
-                    {% endfor %}
-                </span>
+                {% for category in post.categories.all %}
+                    <span class="category-chip">
+                        <i class="fas fa-tag"></i> {{ category.name }}
+                    </span>
+                {% endfor %}
             {% else %}
-                <span class="category-chip empty">Uncategorized</span>
+                <span class="category-chip empty">
+                    <i class="fas fa-inbox"></i> Uncategorized
+                </span>
             {% endif %}
         </div>
 
+        <!-- Post Content -->
         <p class="post-content">{{ post.content }}</p>
 
         <!-- Stats -->
         <div class="post-stats">
             <div class="post-stat-item">
-                <span>👍</span>
+                <i class="fas fa-heart"></i>
                 <span><strong>{{ post.get_like_count }}</strong> {{ post.get_like_count|pluralize:"Like,Likes" }}</span>
             </div>
-
             <div class="post-stat-item">
-                <span>💬</span>
+                <i class="fas fa-comments"></i>
                 <span><strong>{{ post.comments.count }}</strong> {{ post.comments.count|pluralize:"Comment,Comments" }}</span>
             </div>
         </div>
@@ -502,60 +814,265 @@
             <form method="post" action="{% url 'blog:like_post' post.id %}" style="flex: 1;">
                 {% csrf_token %}
                 {% if post.id in liked_post_ids %}
-                    <button type="submit" class="post-action-btn btn-like liked">
-                        💔 Unlike
+                    <button type="submit" class="post-action-btn liked">
+                        <i class="fas fa-heart"></i> Unlike
                     </button>
                 {% else %}
-                    <button type="submit" class="post-action-btn btn-like">
-                        ❤️ Like
+                    <button type="submit" class="post-action-btn">
+                        <i class="far fa-heart"></i> Like
                     </button>
                 {% endif %}
             </form>
-
-            <a href="{% url 'blog:create_comment' post.id %}" class="post-action-btn btn-comment">
-                💬 Comment
+            <a href="{% url 'blog:create_comment' post.id %}" class="post-action-btn">
+                <i class="fas fa-comment"></i> Comment
             </a>
         </div>
 
-        <!-- Comments -->
+        <!-- Comments Section -->
         {% if post.comments.exists %}
-            <div class="comments-section">
-                <div class="comments-title">Recent Comments</div>
-
-                {% for comment in post.comments.all|slice:":3" %}
-                    <div class="comment-item">
-                        <div class="comment-header">
-                            <div class="comment-author">
-                                {{ comment.user.username }}
-                            </div>
-                            <form method="post" action="{% url 'blog:comment_like' comment.id %}" style="display: inline;">
-                                {% csrf_token %}
-                                {% if comment.id in liked_comment_ids %}
-                                    <button type="submit" class="comment-like-btn liked" title="Unlike comment">
-                                        ❤️ {{ comment.get_like_count }}
-                                    </button>
-                                {% else %}
-                                    <button type="submit" class="comment-like-btn" title="Like comment">
-                                        🤍 {{ comment.get_like_count }}
-                                    </button>
-                                {% endif %}
-                            </form>
-                        </div>
-                        <p class="comment-text">{{ comment.content }}</p>
-                    </div>
-                {% endfor %}
+        <div class="comments-section">
+            <div class="comments-title">
+                <i class="fas fa-comments"></i> Recent Comments
             </div>
-        {% endif %}
 
+            {% for comment in post.comments.all|slice:":3" %}
+            <div class="comment-item">
+                <div class="comment-header">
+                    <div class="comment-author">
+                        <i class="fas fa-user-circle"></i> {{ comment.user.username }}
+                    </div>
+                    <div class="comment-actions">
+                        <!-- Like Comment -->
+                        <form method="post" action="{% url 'blog:comment_like' comment.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            {% if comment.id in liked_comment_ids %}
+                                <button type="submit" class="comment-like-btn liked" title="Unlike">
+                                    <i class="fas fa-heart"></i> {{ comment.get_like_count }}
+                                </button>
+                            {% else %}
+                                <button type="submit" class="comment-like-btn" title="Like">
+                                    <i class="far fa-heart"></i> {{ comment.get_like_count }}
+                                </button>
+                            {% endif %}
+                        </form>
+
+                        <!-- Reply -->
+                        <button class="comment-action-btn" onclick="openReplyModal({{ comment.id }})" title="Reply">
+                            <i class="fas fa-reply"></i> Reply
+                        </button>
+
+                        <!-- Edit (only for comment author) -->
+                        {% if comment.user == request.user %}
+                            <button class="comment-action-btn" onclick="openEditModal({{ comment.id }}, `{{ comment.content|escapejs }}`)" title="Edit">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+
+                            <!-- Delete (only for comment author) -->
+                            <button class="comment-action-btn" onclick="openDeleteModal({{ comment.id }})" title="Delete" style="color: var(--danger-color);">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+                <p class="comment-text">{{ comment.content }}</p>
+                <div class="comment-meta">
+                    <i class="fas fa-clock"></i> {{ comment.created_at|date:"M d, Y - H:i" }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
     </div>
-{% empty %}
+    {% empty %}
     <div class="empty-state">
         <div class="empty-state-icon">📭</div>
-        <p>No posts available yet. Be the first to create one!</p>
+        <h3>No Posts Yet</h3>
+        <p>The blog is empty. Create the first post to get started!</p>
+        <div class="empty-state-actions">
+            <a href="{% url 'blog:create_post' %}">
+                <i class="fas fa-plus"></i> Create Your First Post
+            </a>
+        </div>
     </div>
-{% endfor %}
-
+    {% endfor %}
 </div>
 
+<!-- Modals -->
+
+<!-- Reply Modal -->
+<div class="modal fade" id="replyModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-reply"></i> Reply to Comment
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="replyForm" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="replyContent" class="form-label">Your Reply</label>
+                        <textarea class="form-control" id="replyContent" name="content" rows="4" placeholder="Write your reply..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-modal-action btn-modal-cancel" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn-modal-action btn-modal-submit">
+                        <i class="fas fa-paper-plane"></i> Post Reply
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit"></i> Edit Comment
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editForm" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="editContent" class="form-label">Comment Text</label>
+                        <textarea class="form-control" id="editContent" name="content" rows="4" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-modal-action btn-modal-cancel" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn-modal-action btn-modal-submit">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-trash"></i> Delete Comment
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning" role="alert">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Are you sure you want to delete this comment? This action cannot be undone.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modal-action btn-modal-cancel" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-modal-action btn-modal-danger">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    const replyModal = new bootstrap.Modal(document.getElementById('replyModal'));
+    const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+
+    function openReplyModal(id) {
+        const baseUrl = "{% url 'blog:comment_reply' 0 %}".replace('0', id);
+        document.getElementById("replyForm").action = baseUrl;
+        document.getElementById("replyContent").value = '';
+        replyModal.show();
+    }
+
+    function openEditModal(id, content) {
+        const baseUrl = "{% url 'blog:comment_update' 0 %}".replace('0', id);
+        document.getElementById("editForm").action = baseUrl;
+        document.getElementById("editContent").value = content;
+        editModal.show();
+    }
+
+    function openDeleteModal(id) {
+        const baseUrl = "{% url 'blog:comment_delete' 0 %}".replace('0', id);
+        document.getElementById("deleteForm").action = baseUrl;
+        deleteModal.show();
+    }
+
+    function closeAllPostMenus() {
+        document.querySelectorAll('.post-options-menu').forEach(function (menu) {
+            menu.classList.remove('show');
+        });
+    }
+
+    function togglePostMenu(postId) {
+        const menu = document.getElementById('post-menu-' + postId);
+        if (!menu) return;
+        const isOpen = menu.classList.contains('show');
+        closeAllPostMenus();
+        if (!isOpen) {
+            menu.classList.add('show');
+        }
+    }
+
+    function toggleNotInterestedForm(postId) {
+        const targetForm = document.getElementById('not-interested-form-' + postId);
+        if (!targetForm) return;
+        document.querySelectorAll('.not-interested-form').forEach(function (formEl) {
+            if (formEl !== targetForm) {
+                formEl.classList.remove('show');
+            }
+        });
+        targetForm.classList.toggle('show');
+        closeAllPostMenus();
+    }
+
+    function cancelNotInterestedForm(postId) {
+        const targetForm = document.getElementById('not-interested-form-' + postId);
+        if (!targetForm) return;
+        const textarea = targetForm.querySelector('textarea[name="reason"]');
+        if (textarea) {
+            textarea.value = '';
+        }
+        targetForm.classList.remove('show');
+    }
+
+    document.addEventListener('click', function (event) {
+        if (!event.target.closest('.post-options')) {
+            closeAllPostMenus();
+        }
+    });
+
+    // Reset modals on hide
+    document.getElementById('replyModal').addEventListener('hidden.bs.modal', function() {
+        document.getElementById("replyForm").reset();
+    });
+
+    document.getElementById('editModal').addEventListener('hidden.bs.modal', function() {
+        document.getElementById("editForm").reset();
+    });
+</script>
+
 {% endblock %}
+
 

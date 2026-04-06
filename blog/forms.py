@@ -29,3 +29,11 @@ class InterestForm(forms.Form):
         queryset=Category.objects.all(),
         widget=forms.CheckboxSelectMultiple
     )
+
+
+class NotInterestedReasonForm(forms.Form):
+    reason = forms.CharField(
+        max_length=400,
+        required=True,
+        widget=forms.Textarea(attrs={"rows": 3, "placeholder": "Tell us why this post is not relevant to you..."}),
+    )

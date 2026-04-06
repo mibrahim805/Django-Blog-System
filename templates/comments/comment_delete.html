@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<style>
+    :root {
+        --primary-color: #667eea;
+        --secondary-color: #764ba2;
+        --light-bg: #f8f9fa;
+        --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        --hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    body {
+        background-color: var(--light-bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+    }
+
+    .container-center {
+        max-width: 500px;
+        width: 100%;
+        padding: 20px;
+    }
+
+    .card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: var(--hover-shadow);
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+        color: white;
+        border: none;
+        border-radius: 12px 12px 0 0;
+        padding: 24px;
+    }
+
+    .card-header h2 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 700;
+    }
+
+    .card-body {
+        padding: 24px;
+    }
+
+    .warning-box {
+        background-color: #fff5f5;
+        border-left: 4px solid #f56565;
+        padding: 16px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .warning-box p {
+        margin: 0;
+        color: #c53030;
+        font-weight: 500;
+    }
+
+    .comment-preview {
+        background-color: #f7fafc;
+        padding: 16px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border-left: 3px solid var(--primary-color);
+    }
+
+    .comment-preview-author {
+        font-weight: 600;
+        color: #2d3748;
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+
+    .comment-preview-text {
+        color: #4a5568;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .btn-container {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+    }
+
+    .btn-action {
+        padding: 10px 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-cancel {
+        background-color: #e2e8f0;
+        color: #4a5568;
+    }
+
+    .btn-cancel:hover {
+        background-color: #cbd5e0;
+    }
+
+    .btn-delete {
+        background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+        color: white;
+    }
+
+    .btn-delete:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(245, 101, 101, 0.4);
+    }
+
+    @media (max-width: 600px) {
+        .btn-container {
+            flex-direction: column-reverse;
+        }
+
+        .btn-action {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="container-center">
+    <div class="card">
+        <div class="card-header">
+            <h2>🗑️ Delete Comment</h2>
+        </div>
+        <div class="card-body">
+            <div class="warning-box">
+                <p>⚠️ This action cannot be undone. The comment will be permanently deleted.</p>
+            </div>
+
+            <div class="comment-preview">
+                <div class="comment-preview-author">Comment by {{ comment.user.username }}</div>
+                <div class="comment-preview-text">{{ comment.content }}</div>
+            </div>
+
+            <p class="text-muted mb-24">Are you sure you want to delete this comment?</p>
+
+            <div class="btn-container">
+                <a href="{% url 'blog:home' %}" class="btn-action btn-cancel">Cancel</a>
+                <form method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-action btn-delete">Delete Comment</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}
+

@@ -28,6 +28,7 @@ class Comment(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    parent_comment = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return self.content
@@ -71,8 +72,34 @@ class Category(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     interested_in = models.ManyToManyField(Category, related_name='interested_users')
+    not_interested_posts = models.ManyToManyField(Post, related_name='user_not_interested_posts')
 
     def __str__(self):
         return str(self.interested_in.all())
+
+class Follow(models.Model):
+    follower = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='following_users')
+    following = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='followed_by_users')
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('follower', 'following')
+    
+    def __str__(self):
+        return f"{self.follower.username} follows {self.following.username}"
+
+
+class NotInterestedPost(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="not_interested_entries")
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="not_interested_entries")
+    reason = models.TextField(max_length=400)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "post")
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.user.username} not interested in {self.post.title}"
 
 

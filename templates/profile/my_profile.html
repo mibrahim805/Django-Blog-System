@@ -38,12 +38,12 @@
             <div class="stat-label">Posts Published</div>
         </div>
         <div class="stat-card">
-            <div class="stat-number">{{ user_likes }}</div>
-            <div class="stat-label">Likes Received</div>
+            <div class="stat-number">{{ followers_count }}</div>
+            <div class="stat-label">Followers</div>
         </div>
         <div class="stat-card">
-            <div class="stat-number">{{ user_comments }}</div>
-            <div class="stat-label">Comments</div>
+            <div class="stat-number">{{ following_count }}</div>
+            <div class="stat-label">Following</div>
         </div>
     </div>
 
@@ -135,6 +135,90 @@
             </div>
         </div>
     </div>
+
+    <div class="profile-section">
+        <h2 class="section-title">🙈 Not Interested Posts ({{ not_interested_count }})</h2>
+
+        {% if not_interested_entries %}
+            <div class="not-interested-list">
+                {% for entry in not_interested_entries|slice:":8" %}
+                    <article class="not-interested-item">
+                        <div class="not-interested-head">
+                            <h4>{{ entry.post.title }}</h4>
+                            <small>{{ entry.created_at|date:"M d, Y - H:i" }}</small>
+                        </div>
+                        <p class="not-interested-reason">{{ entry.reason }}</p>
+                        <p class="not-interested-meta">
+                            <i class="fas fa-user"></i> by @{{ entry.post.author.username }}
+                        </p>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <p>You have not marked any post as not interested yet.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Followers and Following Section -->
+    {% if followers or following %}
+    <div class="profile-connections-grid">
+        {% if followers %}
+        <div class="profile-section connections-section">
+            <h2 class="section-title">👥 Followers ({{ followers_count }})</h2>
+
+            <div class="followers-grid">
+                {% for follower in followers|slice:":6" %}
+                    <div class="follower-card">
+                        <div class="follower-avatar">{{ follower.username|first|upper }}</div>
+                        <div class="follower-info">
+                            <h4>{{ follower.get_full_name|default:follower.username }}</h4>
+                            <p>@{{ follower.username }}</p>
+                        </div>
+                        <a href="{% url 'blog:other_profile' follower.id %}" class="follower-link">
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+
+            {% if followers.count > 6 %}
+            <div class="view-more-hint">
+                <small><i class="fas fa-info-circle"></i> Showing 6 of {{ followers_count }} followers</small>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if following %}
+        <div class="profile-section connections-section">
+            <h2 class="section-title">➡️ Following ({{ following_count }})</h2>
+
+            <div class="followers-grid">
+                {% for followed_user in following|slice:":6" %}
+                    <div class="follower-card">
+                        <div class="follower-avatar">{{ followed_user.username|first|upper }}</div>
+                        <div class="follower-info">
+                            <h4>{{ followed_user.get_full_name|default:followed_user.username }}</h4>
+                            <p>@{{ followed_user.username }}</p>
+                        </div>
+                        <a href="{% url 'blog:other_profile' followed_user.id %}" class="follower-link">
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+
+            {% if following.count > 6 %}
+            <div class="view-more-hint">
+                <small><i class="fas fa-info-circle"></i> Showing 6 of {{ following_count }} following</small>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
 
 </div>
 
@@ -452,6 +536,156 @@
         margin-bottom: 16px;
     }
 
+    /* ===== FOLLOWERS & FOLLOWING ===== */
+    .profile-connections-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 24px;
+        margin-bottom: 24px;
+    }
+
+    .connections-section {
+        margin-bottom: 0;
+    }
+
+    .followers-grid {
+        display: grid;
+        gap: 12px;
+    }
+
+    .follower-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        background-color: var(--bg-light);
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+        transition: all 0.2s ease;
+    }
+
+    .follower-card:hover {
+        background-color: #f0f4ff;
+        border-color: var(--primary-color);
+    }
+
+    .follower-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+
+    .follower-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .follower-info h4 {
+        margin: 0;
+        font-size: 13px;
+        color: var(--text-dark);
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .follower-info p {
+        margin: 2px 0 0;
+        font-size: 11px;
+        color: var(--text-light);
+    }
+
+    .follower-link {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        font-size: 12px;
+    }
+
+    .follower-link:hover {
+        background: var(--secondary-color);
+        transform: scale(1.1);
+    }
+
+    .view-more-hint {
+        margin-top: 12px;
+        padding: 10px;
+        background-color: var(--bg-light);
+        border-radius: 8px;
+        text-align: center;
+    }
+
+    .view-more-hint small {
+        color: var(--text-light);
+        font-size: 12px;
+    }
+
+    .view-more-hint i {
+        color: var(--primary-color);
+        margin-right: 4px;
+    }
+
+    .not-interested-list {
+        display: grid;
+        gap: 12px;
+    }
+
+    .not-interested-item {
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: 14px;
+        background: #f8fafc;
+    }
+
+    .not-interested-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: baseline;
+        margin-bottom: 8px;
+    }
+
+    .not-interested-head h4 {
+        margin: 0;
+        color: var(--text-dark);
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .not-interested-head small {
+        color: var(--text-light);
+        font-size: 12px;
+    }
+
+    .not-interested-reason {
+        margin: 0 0 8px;
+        color: #374151;
+        line-height: 1.55;
+    }
+
+    .not-interested-meta {
+        margin: 0;
+        color: var(--text-light);
+        font-size: 13px;
+    }
+
     /* ===== RESPONSIVE ===== */
     @media (max-width: 768px) {
         .profile-header-content {
@@ -492,6 +726,10 @@
         }
 
         .activity-stats {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-connections-grid {
             grid-template-columns: 1fr;
         }
     }
