@@ -852,16 +852,19 @@
 
         <!-- Actions -->
         <div class="post-actions">
-            <form method="post" action="{% url 'blog:like_post' post.id %}" style="flex: 1;" onsubmit="return handlePostLike(event, {{ post.id }})">
-                {% csrf_token %}
-                <button type="submit" class="post-action-btn{% if post.id in liked_post_ids %} liked{% endif %}" id="like-btn-{{ post.id }}" {% if post.id in liked_post_ids %}data-liked="true"{% else %}data-liked="false"{% endif %}>
-                    {% if post.id in liked_post_ids %}
-                        <i class="fas fa-heart"></i> Unlike
-                    {% else %}
-                        <i class="far fa-heart"></i> Like
-                    {% endif %}
-                </button>
-            </form>
+            <button type="button" class="post-action-btn" onclick="handlePostLike(event, {{ post.id }})" id="like-btn-{{ post.id }}" {% if post.id in liked_post_ids %}data-liked="true"{% else %}data-liked="false"{% endif %}>
+                {% if post.id in liked_post_ids %}
+                    <i class="fas fa-heart"></i> Unlike
+                {% else %}
+                    <i class="far fa-heart"></i> Like
+                {% endif %}
+            </button>
+                {% if post.id in liked_post_ids %}
+                    <i class="fas fa-heart"></i> Unlike
+                {% else %}
+                    <i class="far fa-heart"></i> Like
+                {% endif %}
+            </button>
             <button type="button" class="post-action-btn" onclick="toggleCommentForm({{ post.id }})">
                 <i class="fas fa-comment"></i> Comment
             </button>
@@ -902,17 +905,14 @@
                     </div>
                     <div class="comment-actions">
                         <!-- Like Comment -->
-                        <form method="post" action="{% url 'blog:comment_like' comment.id %}" style="display: inline;" onsubmit="return handleCommentLike(event, {{ comment.id }})">
-                            {% csrf_token %}
-                            <button type="submit" class="comment-like-btn{% if comment.id in liked_comment_ids %} liked{% endif %}" id="comment-like-{{ comment.id }}" {% if comment.id in liked_comment_ids %}data-liked="true"{% else %}data-liked="false"{% endif %} title="Like">
-                                {% if comment.id in liked_comment_ids %}
-                                    <i class="fas fa-heart"></i>
-                                {% else %}
-                                    <i class="far fa-heart"></i>
-                                {% endif %}
-                                <span id="like-count-{{ comment.id }}">{{ comment.get_like_count }}</span>
-                            </button>
-                        </form>
+                        <button type="button" class="comment-like-btn" onclick="handleCommentLike(event, {{ comment.id }})" id="comment-like-{{ comment.id }}" {% if comment.id in liked_comment_ids %}data-liked="true"{% else %}data-liked="false"{% endif %} title="Like">
+                            {% if comment.id in liked_comment_ids %}
+                                <i class="fas fa-heart"></i>
+                            {% else %}
+                                <i class="far fa-heart"></i>
+                            {% endif %}
+                            <span id="like-count-{{ comment.id }}">{{ comment.get_like_count }}</span>
+                        </button>
 
                         <!-- Reply -->
                         <button class="comment-action-btn" onclick="toggleReplyForm({{ comment.id }})" title="Reply">
@@ -1201,28 +1201,19 @@
         });
     }
 
-    function getCsrfToken() {
-        const tokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
-        if (tokenInput && tokenInput.value) {
-            return tokenInput.value;
-        }
-        const match = document.cookie.match(/(?:^|; )csrftoken=([^;]+)/);
-        return match ? decodeURIComponent(match[1]) : '';
-    }
-
     function handlePostLike(e, postId) {
         e.preventDefault();
-        const form = e.target;
         const btn = document.getElementById('like-btn-' + postId);
 
-        fetch(form.action, {
+        const formData = new FormData();
+
+        fetch("{% url 'blog:like_post' 0 %}".replace('0', postId), {
             method: 'POST',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRFToken': getCsrfToken(),
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
             },
-            credentials: 'same-origin',
-            body: new FormData(form),
+            body: formData,
         })
         .then(r => r.json())
         .then(data => {
@@ -1237,22 +1228,21 @@
             }
         })
         .catch(err => console.error('Like error:', err));
-        return false;
     }
 
     function handleCommentLike(e, commentId) {
         e.preventDefault();
-        const form = e.target;
         const btn = document.getElementById('comment-like-' + commentId);
 
-        fetch(form.action, {
+        const formData = new FormData();
+
+        fetch("{% url 'blog:comment_like' 0 %}".replace('0', commentId), {
             method: 'POST',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRFToken': getCsrfToken(),
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
             },
-            credentials: 'same-origin',
-            body: new FormData(form),
+            body: formData,
         })
         .then(r => r.json())
         .then(data => {
@@ -1271,7 +1261,6 @@
             }
         })
         .catch(err => console.error('Comment like error:', err));
-        return false;
     }
 
     function toggleReplyForm(commentId) {
