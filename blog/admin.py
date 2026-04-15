@@ -23,3 +23,7 @@ class ProfileAdmin(admin.ModelAdmin):
 admin.site.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
     list_display = ["user", "comment"]
+
+
+# admin.site.register(Like)
+# class 

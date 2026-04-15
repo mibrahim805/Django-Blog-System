@@ -160,65 +160,65 @@
             </div>
         {% endif %}
     </div>
-
-    <!-- Followers and Following Section -->
-    {% if followers or following %}
-    <div class="profile-connections-grid">
-        {% if followers %}
-        <div class="profile-section connections-section">
-            <h2 class="section-title">👥 Followers ({{ followers_count }})</h2>
-
-            <div class="followers-grid">
-                {% for follower in followers|slice:":6" %}
-                    <div class="follower-card">
-                        <div class="follower-avatar">{{ follower.username|first|upper }}</div>
-                        <div class="follower-info">
-                            <h4>{{ follower.get_full_name|default:follower.username }}</h4>
-                            <p>@{{ follower.username }}</p>
-                        </div>
-                        <a href="{% url 'blog:other_profile' follower.id %}" class="follower-link">
-                            <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </div>
-                {% endfor %}
-            </div>
-
-            {% if followers.count > 6 %}
-            <div class="view-more-hint">
-                <small><i class="fas fa-info-circle"></i> Showing 6 of {{ followers_count }} followers</small>
-            </div>
-            {% endif %}
-        </div>
-        {% endif %}
-
-        {% if following %}
-        <div class="profile-section connections-section">
-            <h2 class="section-title">➡️ Following ({{ following_count }})</h2>
-
-            <div class="followers-grid">
-                {% for followed_user in following|slice:":6" %}
-                    <div class="follower-card">
-                        <div class="follower-avatar">{{ followed_user.username|first|upper }}</div>
-                        <div class="follower-info">
-                            <h4>{{ followed_user.get_full_name|default:followed_user.username }}</h4>
-                            <p>@{{ followed_user.username }}</p>
-                        </div>
-                        <a href="{% url 'blog:other_profile' followed_user.id %}" class="follower-link">
-                            <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </div>
-                {% endfor %}
-            </div>
-
-            {% if following.count > 6 %}
-            <div class="view-more-hint">
-                <small><i class="fas fa-info-circle"></i> Showing 6 of {{ following_count }} following</small>
-            </div>
-            {% endif %}
-        </div>
-        {% endif %}
-    </div>
-    {% endif %}
+{##}
+{#    <!-- Followers and Following Section -->#}
+{#    {% if followers or following %}#}
+{#    <div class="profile-connections-grid">#}
+{#        {% if followers %}#}
+{#        <div class="profile-section connections-section">#}
+{#            <h2 class="section-title">👥 Followers ({{ followers_count }})</h2>#}
+{##}
+{#            <div class="followers-grid">#}
+{#                {% for follower in followers|slice:":6" %}#}
+{#                    <div class="follower-card">#}
+{#                        <div class="follower-avatar">{{ follower.username|first|upper }}</div>#}
+{#                        <div class="follower-info">#}
+{#                            <h4>{{ follower.get_full_name|default:follower.username }}</h4>#}
+{#                            <p>@{{ follower.username }}</p>#}
+{#                        </div>#}
+{#                        <a href="{% url 'blog:other_profile' follower.id %}" class="follower-link">#}
+{#                            <i class="fas fa-arrow-right"></i>#}
+{#                        </a>#}
+{#                    </div>#}
+{#                {% endfor %}#}
+{#            </div>#}
+{##}
+{#            {% if followers.count > 6 %}#}
+{#            <div class="view-more-hint">#}
+{#                <small><i class="fas fa-info-circle"></i> Showing 6 of {{ followers_count }} followers</small>#}
+{#            </div>#}
+{#            {% endif %}#}
+{#        </div>#}
+{#        {% endif %}#}
+{##}
+{#        {% if following %}#}
+{#        <div class="profile-section connections-section">#}
+{#            <h2 class="section-title">➡️ Following ({{ following_count }})</h2>#}
+{##}
+{#            <div class="followers-grid">#}
+{#                {% for followed_user in following|slice:":6" %}#}
+{#                    <div class="follower-card">#}
+{#                        <div class="follower-avatar">{{ followed_user.username|first|upper }}</div>#}
+{#                        <div class="follower-info">#}
+{#                            <h4>{{ followed_user.get_full_name|default:followed_user.username }}</h4>#}
+{#                            <p>@{{ followed_user.username }}</p>#}
+{#                        </div>#}
+{#                        <a href="{% url 'blog:other_profile' followed_user.id %}" class="follower-link">#}
+{#                            <i class="fas fa-arrow-right"></i>#}
+{#                        </a>#}
+{#                    </div>#}
+{#                {% endfor %}#}
+{#            </div>#}
+{##}
+{#            {% if following.count > 6 %}#}
+{#            <div class="view-more-hint">#}
+{#                <small><i class="fas fa-info-circle"></i> Showing 6 of {{ following_count }} following</small>#}
+{#            </div>#}
+{#            {% endif %}#}
+{#        </div>#}
+{#        {% endif %}#}
+{#    </div>#}
+{#    {% endif %}#}
 
 </div>
 

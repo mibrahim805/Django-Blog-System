@@ -859,12 +859,6 @@
                     <i class="far fa-heart"></i> Like
                 {% endif %}
             </button>
-                {% if post.id in liked_post_ids %}
-                    <i class="fas fa-heart"></i> Unlike
-                {% else %}
-                    <i class="far fa-heart"></i> Like
-                {% endif %}
-            </button>
             <button type="button" class="post-action-btn" onclick="toggleCommentForm({{ post.id }})">
                 <i class="fas fa-comment"></i> Comment
             </button>
@@ -1225,6 +1219,8 @@
                     ? '<i class="fas fa-heart"></i> Unlike'
                     : '<i class="far fa-heart"></i> Like';
                 btn.classList.toggle('liked', liked);
+                // Reload to update post like count
+                setTimeout(() => location.reload(), 300);
             }
         })
         .catch(err => console.error('Like error:', err));
@@ -1250,14 +1246,9 @@
             if (data.success) {
                 const liked = data.is_liked;
                 btn.setAttribute('data-liked', liked ? 'true' : 'false');
-                const countEl = document.getElementById('like-count-' + commentId);
-                if (countEl) {
-                    countEl.textContent = data.like_count;
-                }
-                btn.innerHTML = liked
-                    ? '<i class="fas fa-heart"></i> <span id="like-count-' + commentId + '">' + data.like_count + '</span>'
-                    : '<i class="far fa-heart"></i> <span id="like-count-' + commentId + '">' + data.like_count + '</span>';
                 btn.classList.toggle('liked', liked);
+                // Reload page to update comment like count
+                setTimeout(() => location.reload(), 300);
             }
         })
         .catch(err => console.error('Comment like error:', err));

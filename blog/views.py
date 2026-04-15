@@ -1,17 +1,11 @@
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse_lazy
-from django.views import View
-from django.views.generic import CreateView, ListView, FormView, UpdateView, DeleteView
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
-from django_filters.views import FilterView
-from blog.filters import PostFilter
-from blog.forms import RegistrationForm, PostCreateForm, CommentForm, InterestForm, NotInterestedReasonForm
-from blog.models import Post, Notification, Comment, Like, Profile, Category, CustomUser, NotInterestedPost
-from blog.models import Follow
+from django .contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.shortcuts import render, redirect, get_object_or_404
+from .filters import PostFilter
+from .forms import RegistrationForm, PostCreateForm, CommentForm, InterestForm
+from .models import Post, Notification, Profile, CustomUser, NotInterestedPost, Like, Comment, Category, Follow
 
 
 def create_and_push_notification(*, user, post, sender, message):
@@ -29,20 +23,22 @@ def create_and_push_notification(*, user, post, sender, message):
     return notification
 
 
-
-
 def build_profile_context(profile_user, current_user=None):
     from blog.models import Follow
     profile, _ = Profile.objects.get_or_create(user=profile_user)
-    recent_posts = (Post.objects.filter(author=profile_user, is_published=True).select_related("author").prefetch_related("categories").order_by("-created_at")[:6])
+    recent_posts = (
+    Post.objects.filter(author=profile_user, is_published=True).select_related("author").prefetch_related(
+        "categories").order_by("-created_at")[:6])
     followers = CustomUser.objects.filter(following_users__following=profile_user).distinct()
-    following = CustomUser.objects.filter(following_users__follower=profile_user).distinct()
-    
+    following = CustomUser.objects.filter(followed_by_users__follower=profile_user).distinct()
+
     is_following = False
     if current_user and current_user.is_authenticated:
         is_following = Follow.objects.filter(follower=current_user, following=profile_user).exists()
 
-    not_interested_entries = (NotInterestedPost.objects.filter(user=profile_user).select_related("post", "post__author").order_by("-created_at"))
+    not_interested_entries = (
+        NotInterestedPost.objects.filter(user=profile_user).select_related("post", "post__author").order_by(
+            "-created_at"))
     return {
         "profile_user": profile_user,
         "profile": profile,
@@ -56,353 +52,318 @@ def build_profile_context(profile_user, current_user=None):
         "followers_count": followers.count(),
         "following_count": following.count(),
         "is_following": is_following,
-        "followers_list":Follow.objects.filter(following=profile_user).select_related("follower"),
-        "following_list":Follow.objects.filter(follower=profile_user).select_related("following"),
+        "followers_list": Follow.objects.filter(following=profile_user).select_related("follower"),
+        "following_list": Follow.objects.filter(follower=profile_user).select_related("following"),
         "not_interested_entries": not_interested_entries,
-        "not_interested_count": not_interested_entries.count(),}
+        "not_interested_count": not_interested_entries.count(), }
+
+
+def user_register_view(request):
+    if request.method == "POST":
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("blog:login")
+    else:
+        form = RegistrationForm()
+    return render(request, "registration/register.html")
+
+
+@login_required
+def post_list_view(request):
+    hidden_post_ids = NotInterestedPost.objects.filter(user=request.user).values_list("post_id", flat=True)
+    queryset = Post.objects.filter(is_published=True).exclude(id__in=hidden_post_ids).exclude(author=request.user)
+    filter = PostFilter(request.GET, queryset=queryset)
+    posts = filter.qs
+
+    all_categories = Category.objects.order_by("name")
+    selected_category_ids = []
+    for category_id in request.GET.getlist("categories"):
+        if not category_id or category_id == "all":
+            continue
+        try:
+            selected_category_ids.append(int(category_id))
+        except (TypeError, ValueError):
+            continue
+    liked_posts = Like.objects.filter(user=request.user,comment__isnull=True).values_list("post_id", flat=True)
+    liked_comments = Like.objects.filter(user=request.user, post__isnull=True).values_list("comment_id", flat=True)
+    context = {
+        "posts": posts,
+        "filter": filter,
+        "all_categories": all_categories,
+        "selected_category_ids": selected_category_ids,
+        "liked_post_ids": list(liked_posts),
+        "liked_comment_ids": list(liked_comments),
+        "not_interested_form": NotInterestedPost.objects.filter(user=request.user),
+    }
+    return render(request, "post/post_list.html", context)
 
 
 
-
-class UserRegisterView(CreateView):
-    model = CustomUser
-    form_class = RegistrationForm
-    template_name = "registration/register.html"
-    success_url = reverse_lazy("blog:interests")
-
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        Profile.objects.create(user=self.object)
-        return response
-
-
-
-
-class PostListView(LoginRequiredMixin, FilterView):
-    model = Post
-    template_name = "post/post_list.html"
-    context_object_name = "posts"
-    ordering = ["-created_at"]
-    filterset_class = PostFilter
-
-    def get_queryset(self):
-        hidden_post_ids = NotInterestedPost.objects.filter(user=self.request.user).values_list("post_id", flat=True)
-        return (Post.objects.filter(is_published=True).exclude(id__in=hidden_post_ids).exclude(author=self.request.user)
-            .select_related("author")
-            .prefetch_related("categories", "comments", "comments__user")
-            .order_by("-created_at"))
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["all_categories"] = Category.objects.order_by("name")
-        selected_category_ids = []
-        for category_id in self.request.GET.getlist("categories"):
-            if not category_id or category_id == "all":
-                continue
-            try:
-                selected_category_ids.append(int(category_id))
-            except (TypeError, ValueError):
-                continue
-        context["selected_category_ids"] = selected_category_ids
-        liked_posts = Like.objects.filter(user=self.request.user, comment__isnull=True).values_list("post_id", flat=True)
-        context["liked_post_ids"] = list(liked_posts)
-        liked_comments = Like.objects.filter(user=self.request.user, comment__isnull=False).values_list("comment_id", flat=True)
-        context["liked_comment_ids"] = list(liked_comments)
-        context["not_interested_form"] = NotInterestedReasonForm()
-        return context
+@login_required
+def post_create_view(request):
+    if request.method == "Post":
+        form = PostCreateForm(request.POST, request.FILES)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user
+            post.save()
+            if post.is_published:
+                users = CustomUser.objects.exclude(id=request.user.id)
+                for user in users:
+                    create_and_push_notification(user=user,post=post,sender=request.user,message=f"{request.user.username} published a new post.",)
+            return redirect("blog:my_posts")
+    else:
+        form = PostCreateForm()
+    return render(request, "post/post_create.html", {"form": form})
 
 
-
-
-class PostCreateView(LoginRequiredMixin, CreateView):
-    model = Post
-    form_class = PostCreateForm
-    template_name = "post/post_create.html"
-    success_url = reverse_lazy("blog:home")
-
-    def form_valid(self, form):
-        form.instance.author = self.request.user
-        response = super().form_valid(form)
-        if form.instance.is_published:
-            print("is_published")
-            users = CustomUser.objects.exclude(id=self.request.user.id)
-            for user in users:
-                create_and_push_notification(user=user,post=form.instance,sender=self.request.user,message=f"{self.request.user.username} published a new post.",)
-        return response
-
-
-
-
-class PostUpdateView(LoginRequiredMixin, UpdateView):
-    model = Post
-    form_class = PostCreateForm
-    template_name = "post/post_create.html"
-    success_url = reverse_lazy("blog:home")
-
-    def form_valid(self, form):
-        form.instance.author = self.request.user
-        response= super().form_valid(form)
-        if form.instance.is_published:
-            print("is_published")
-            users = CustomUser.objects.exclude(id=self.request.user.id)
-            for user in users:
-                create_and_push_notification(user=user,post=form.instance,sender=self.request.user,message=f"{self.request.user.username} published a new post.",)
-        return response
-
-
-
-
-class PostDeleteView(LoginRequiredMixin,DeleteView):
-    model=Post
-    template_name = "post/delete_post.html"
-    success_url=reverse_lazy("blog:my_posts")
-
-
-
-
-class CommentCreateView(LoginRequiredMixin, CreateView):
-    model = Comment
-    form_class = CommentForm
-    template_name = "comments/comment_create.html"
-    success_url = reverse_lazy("blog:home")
-
-    def form_valid(self, form):
-        post_id = self.kwargs.get("post_id")
-        form.instance.post_id = post_id
-        form.instance.user = self.request.user
-        response = super().form_valid(form)
-
-        post = get_object_or_404(Post, id=post_id)
-        if post.author != self.request.user:
-            create_and_push_notification(user=post.author,post=post,sender=self.request.user,message=f"{self.request.user.username} commented on your post.",)
-
-        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest' or self.request.POST.get('ajax'):
-            return JsonResponse({'success': True, 'comment_id': form.instance.id, 'message': 'Comment posted successfully'})
-        return response
-
-    def form_invalid(self, form):
-        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest' or self.request.POST.get('ajax'):
-            return JsonResponse({'success': False, 'error': str(form.errors)})
-        return super().form_invalid(form)
-
-
-
-
-class LikeView(LoginRequiredMixin,View):
-    def post(self, request, post_id):
-        post =  get_object_or_404(Post, id=post_id)
-        like = Like.objects.filter(user=request.user, post=post).first()
-        is_liked = False
-        if like:
-            like.delete()
+@login_required
+def post_update_view(request, post_id):
+    post = Post.objects.get(id=post_id)
+    if request.method == "POST":
+        form = PostCreateForm(request.POST, request.FILES, instance=post)
+        if form.is_valid():
+            form.save()
+            if post.is_published:
+                users = CustomUser.objects.exclude(id=request.user.id)
+                for user in users:
+                    create_and_push_notification(user=user,post=post,sender=request.user,message=f"{request.user.username} updated a post.",)
+            return redirect("blog:my_posts")
         else:
-            Like.objects.create(user=request.user, post=post)
-            is_liked = True
-            if post.author != request.user:
-                create_and_push_notification(user=post.author,post=post,sender=request.user,message=f"{request.user.username} liked your post.",)
+            form = PostCreateForm(instance=post)
+    return render(request, "post/post_create.html", {"form": form, "post": post})
 
-        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.POST.get('ajax')
-        if is_ajax:
-            return JsonResponse({'success': True, 'is_liked': is_liked})
+
+
+@login_required
+def post_delete_view(request, post_id):
+    post = Post.objects.get(id=post_id)
+    post.delete()
+    return redirect("blog:my_posts")
+
+
+
+@login_required
+def comment_createView(request, post_id):
+    post = Post.objects.get(id=post_id)
+    if request.method == "POST":
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.user = request.user
+            comment.post = post
+            comment.save()
+            if post.author != request.user:
+                create_and_push_notification(user=post.author,post=post,sender=request.user,message=f"{request.user.username} commented on your post.",)
+
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.post.get('ajax'):
+                return JsonResponse({'success': True, 'comment_id': comment.id, 'message': 'Comment posted successfully'})
+            return redirect("blog:home")
+
+
+
+@login_required
+def comment_edit_view(request, comment_id):
+    if request.method == "POST":
+        comment = get_object_or_404(Comment, id=comment_id, user=request.user)
+        new_content = request.POST.get("content")
+        if new_content:
+            comment.content = new_content
+            comment.save()
+            return redirect("blog:home")
+
+
+
+@login_required
+def comment_delete_view(request, comment_id):
+    if request.method == "POST":
+        comment = get_object_or_404(Comment, id=comment_id, user=request.user)
+        post_id = comment.post.id
+        comment.delete()
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.post.get('ajax'):
+            return JsonResponse({'success': True, 'post_id': post_id})
         return redirect("blog:home")
 
 
 @login_required
-def notifications_list(request):
-    new_notifications = Notification.objects.filter(user=request.user, is_read=False).order_by("-created_at")
-    old_notifications = Notification.objects.filter(user=request.user, is_read=True).order_by("-created_at")
-    return render(request, "notifications/list.html", {"new_notifications": new_notifications,"old_notifications": old_notifications,})
+def comment_like_view(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    like = Like.objects.filter(user=request.user, comment=comment)
+    is_liked = False
+    if like:
+        like.delete()
+    else:
+        Like.objects.create(user=request.user, comment=comment)
+        is_liked = True
+        if comment.post.author != request.user:
+            create_and_push_notification(user=comment.post.author,post=comment.post,sender=request.user,message=f"{request.user.username} liked your comment.",)
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.POST.get('ajax'):
+        return JsonResponse({'success': True, 'is_liked': is_liked})
+    return redirect("blog:home")
+
+
+
+@login_required
+def comment_reply_view(request, comment_id):
+    parent_comment = get_object_or_404(Comment, id=comment_id)
+    if request.method == "POST":
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.user = request.user
+            comment.post = parent_comment.post
+            comment.parent = parent_comment
+            comment.save()
+            if parent_comment.user != request.user:
+                create_and_push_notification(user=parent_comment.user,post=parent_comment.post,sender=request.user,message=f"{request.user.username} replied to your comment.",)
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.post.get('ajax'):
+                return JsonResponse({'success': True, 'comment_id': comment.id, 'message': 'Reply posted successfully'})
+            return redirect("blog:home")
 
 
 
 
 @login_required
-def notifications_unread_count(request):
+def like_view(request, post_id):
+    post = get_object_or_404(Post,id=post_id)
+    like = Like.objects.filter(user=request.user, post=post, comment__isnull=True)
+    is_liked = False
+    if like:
+        like.delete()
+    else:
+        Like.objects.create(user=request.user, post=post)
+        is_liked = True
+        if post.author != request.user:
+            create_and_push_notification(user=post.author,post=post,sender=request.user,message=f"{request.user.username} liked your post.",)
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.POST.get('ajax'):
+        return JsonResponse({'success': True, 'is_liked': is_liked})
+    return redirect("blog:home")
+
+
+
+@login_required
+def notifications_list_view(request):
+    new_notifications = Notification.objects.filter(user=request.user, is_read=False).order_by("-created_at")
+    old_notifications = Notification.objects.filter(user=request.user, is_read=True).order_by("-created_at")
+    return render(request, "notifications/list.html", {"new_notifications": new_notifications, "old_notifications": old_notifications,})
+
+
+
+@login_required
+def unread_notifications_count_view(request):
     unread_count = Notification.objects.filter(user=request.user, is_read=False).count()
     return JsonResponse({"unread_count": unread_count})
 
 
 
-
-class MarkReadView(LoginRequiredMixin, View):
-    def post(self, request, *args, **kwargs):
-        notification_id = kwargs.get("notification_id")
-        notification = get_object_or_404(Notification, id=notification_id, user=request.user)
-        notification.is_read = True
-        notification.save()
-        return redirect("blog:notifications_list")
+@login_required
+def mark_as_read_view(request, notification_id):
+    notification = get_object_or_404(Notification, id=notification_id)
+    notification.is_read = True
+    notification.save()
+    return redirect("blog:notifications_list")
 
 
-class MarkAllReadView(LoginRequiredMixin, View):
-    def post(self, request, *args, **kwargs):
-        Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
-        return redirect("blog:notifications_list")
+@login_required
+def mark_all_as_read_view(request):
+    Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+    return redirect("blog:notifications_list")
 
 
 
-
-class SelectInterestsView(LoginRequiredMixin, FormView):
-    template_name = "interest/select_interest.html"
-    form_class = InterestForm
-    success_url = reverse_lazy("blog:home")
-
-    def form_valid(self, form):
-        interests = form.cleaned_data["interests"]
-        profile = self.request.user.profile
-        profile.interested_in.set(interests)
-        return super().form_valid(form)
-
-
-
-
-class MyPostsView(LoginRequiredMixin, ListView):
-    model = Post
-    template_name = "post/my_posts.html"
-    context_object_name = "posts"
-
-    def get_queryset(self):
-        user = self.request.user
-        queryset = Post.objects.filter(author=user).order_by("-created_at")
-        return queryset
-
-
-
-
-class UserProfileView(LoginRequiredMixin, View):
-    def get(self, request):
-        context = build_profile_context(request.user, request.user)
-        context["user"] = request.user
-        return render(request, "profile/my_profile.html", context)
-
-
-
-
-class CommentLikeView(LoginRequiredMixin, View):
-    def post(self, request, comment_id):
-        comment = get_object_or_404(Comment, id=comment_id)
-        like = Like.objects.filter(user=request.user, comment=comment)
-        is_liked = False
-        if like:
-            like.delete()
-        else:
-            Like.objects.create(user=request.user, comment=comment)
-            is_liked = True
-            if comment.user != request.user:
-                create_and_push_notification(user=comment.user,post=comment.post,sender=request.user,message=f"{request.user.username} liked your comment.",)
-        like_count = comment.get_like_count()
-
-        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.POST.get('ajax')
-        if is_ajax:
-            return JsonResponse({'success': True, 'is_liked': is_liked, 'like_count': like_count})
-
-        return redirect("blog:home")
-
-
-
-
-class CommentReplyView(LoginRequiredMixin, View):
-    def post(self, request, comment_id):
-        parent_comment = get_object_or_404(Comment, id=comment_id)
-        content = request.POST.get("content")
-        reply_comment = None
-
-        if content:
-            reply_comment = Comment.objects.create(post=parent_comment.post,user=request.user,content=content)
-            if parent_comment.user != request.user:
-                create_and_push_notification(user=parent_comment.user,post=parent_comment.post,sender=request.user,message=f"{request.user.username} replied to your comment.",)
-
-        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.POST.get('ajax')
-        if is_ajax:
-            return JsonResponse({'success': True, 'reply_id': reply_comment.id if reply_comment else None})
-
-        return redirect("blog:home")
-
-
-
-
-class CommentDeleteView(LoginRequiredMixin, View):
-    def post(self, request, comment_id):
-        comment = get_object_or_404(Comment, id=comment_id, user=request.user)
-        comment.delete()
-        return redirect("blog:home")
-
-
-
-
-class CommentUpdateView(LoginRequiredMixin, View):
-    def post(self, request, comment_id):
-        comment = get_object_or_404(Comment, id=comment_id, user=request.user)
-        new_content = request.POST.get("content")
-        if new_content and new_content.strip():
-            comment.content = new_content.strip()
-            comment.save()
-        return redirect("blog:home")
-
-
-
-
-class OtherUserProfileView(LoginRequiredMixin, View):
-    def get(self, request, user_id):
-        other_user = get_object_or_404(CustomUser, id=user_id)
-        context = build_profile_context(other_user, request.user)
-        context["other_user"] = other_user
-        context["is_own_profile"] = other_user == request.user
-        return render(request, "profile/other_profile.html", context)
-
-
-
-
-class FollowUserView(LoginRequiredMixin, View):
-    def post(self, request, user_id):
-        follower = request.user
-        following = get_object_or_404(CustomUser, id=user_id)
-        follow_relation = Follow.objects.filter(follower=follower, following=following).first()
-        if follow_relation:
-            follow_relation.delete()
-        else:
-            Follow.objects.create(follower=follower, following=following)
-        return redirect("blog:other_profile", user_id=user_id)
-
-
-
-
-class FollowerListView(LoginRequiredMixin,View):
-    def get(self, request, user_id):
-        user = get_object_or_404(CustomUser, id=user_id)
-        followers = CustomUser.objects.filter(following_users__following=user).distinct()
-        return render(request, "profile/followers_list.html", {"followers": followers, "profile_user": user})
-
-
-
-class FollowingListView(LoginRequiredMixin,View):
-    def get(self, request, user_id):
-        user = get_object_or_404(CustomUser, id=user_id)
-        following = CustomUser.objects.filter(following_users__follower=user).distinct()
-        return render(request, "profile/following_list.html", {"following": following, "profile_user": user})
-
-
-
-
-class MarkNotInterestedView(LoginRequiredMixin, View):
-    def post(self, request, post_id):
-        post = get_object_or_404(Post, id=post_id, is_published=True)
-        form = NotInterestedReasonForm(request.POST)
-        if not form.is_valid():
+@login_required
+def select_interest_view(request):
+    if request.method == "Post":
+        form = InterestForm(request.POST)
+        if form.is_valid():
+            interests = form.cleaned_data["interests"]
+            profile = request.user.profile
+            profile.interested_in.set(interests)
             return redirect("blog:home")
-        reason = form.cleaned_data["reason"].strip()
-        NotInterestedPost.objects.update_or_create(user=request.user,post=post,defaults={"reason": reason},)
-        return redirect("blog:home")
+    else:
+        form = InterestForm({"interests": request.user.profile.interested_in.all()})
+    return render(request, "interest/select_interest.html", {"form": form})
+
+
+
+@login_required
+def my_posts_view(request):
+    posts = Post.objects.filter(author=request.user, is_published=True).order_by("-created_at")
+    return render(request, "post/my_posts.html", {"posts": posts})
+
+
+
+@login_required
+def my_profile_view(request):
+    context = build_profile_context(request.user, request.user)
+    return render(request, "profile/my_profile.html", context)
+
+
+
+@login_required
+def other_user_profile_view(request, user_id):
+    other_user = get_object_or_404(CustomUser, id=user_id)
+    context = build_profile_context(other_user, request.user)
+    context["other_user"] = other_user
+    context["is_own_profile"] = other_user == request.user
+    return render(request, "profile/other_profile.html", context)
+
+
+
+@login_required
+def user_follow_view(request, user_id):
+    follower = request.user
+    following = get_object_or_404(CustomUser, id=user_id)
+    follow = Follow.objects.get(follower=follower, following=following)
+    if follow:
+        follow.delete()
+    else:
+        Follow.objects.create(follower=follower, following=following)
+        if following != request.user:
+            create_and_push_notification(user=following,post=None,sender=request.user,message=f"{request.user.username} started following you.",)
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.post.get('ajax'):
+                return JsonResponse({'success': True, 'message': 'User followed successfully'})
+    return redirect("blog:other_user_profile")
+
+
+@login_required
+def follower_list_view(request, user_id):
+    profile_user = get_object_or_404(CustomUser, id=user_id)
+    followers = CustomUser.objects.filter(following_users__following=profile_user).distinct()
+    return render(
+        request,
+        "profile/followers_list.html",
+        {"profile_user": profile_user, "followers": followers},
+    )
+
+
+
+@login_required
+def following_list_view(request, user_id):
+    profile_user = get_object_or_404(CustomUser, id=user_id)
+    following = CustomUser.objects.filter(followed_by_users__follower=profile_user).distinct()
+    return render(
+        request,
+        "profile/following_list.html",
+        {"profile_user": profile_user, "following": following},
+    )
 
 
 
 
-class NotInterestedPostListView(LoginRequiredMixin,View):
-    def get(self,request, user_id):
-        user = get_object_or_404(CustomUser, id=user_id)
-        not_interested_posts = (NotInterestedPost.objects.filter(user=user).select_related("post", "post__author").order_by("-created_at"))
-        return render(request, "post/not_interested_posts.html", {"not_interested_posts": not_interested_posts})
+@login_required
+def not_interested_view(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    NotInterestedPost.objects.create(user=request.user, post=post)
+    return redirect("blog:home")
 
 
-
+@login_required
+def not_interested_post_list_view(request):
+    posts = NotInterestedPost.objects.filter(user=request.user).order_by("-created_at")
+    return render(request, "post/not_interested_posts.html", {"posts": posts})
 
 
