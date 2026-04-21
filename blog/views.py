@@ -102,16 +102,19 @@ def post_list_view(request):
 
 @login_required
 def post_create_view(request):
-    if request.method == "Post":
+    if request.method == "POST":
         form = PostCreateForm(request.POST, request.FILES)
         if form.is_valid():
             post = form.save(commit=False)
             post.author = request.user
+            print("before create",form.cleaned_data["category"])
             post.save()
+            print("after create",form.cleaned_data["category"])
             if post.is_published:
                 users = CustomUser.objects.exclude(id=request.user.id)
                 for user in users:
                     create_and_push_notification(user=user,post=post,sender=request.user,message=f"{request.user.username} published a new post.",)
+
             return redirect("blog:my_posts")
     else:
         form = PostCreateForm()
