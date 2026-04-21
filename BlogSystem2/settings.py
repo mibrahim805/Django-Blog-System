@@ -129,6 +129,15 @@ LOGIN_URL = 'blog:login'
 LOGIN_REDIRECT_URL = '/post_list/'
 LOGOUT_REDIRECT_URL = 'blog:login'
 
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+EMAIL_HOST_USER = "mibrahimjutt1266@gmail.com"
+EMAIL_HOST_PASSWORD = "hydr ikxy fpfq hcvy"
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 

@@ -4,6 +4,7 @@ from blog.views import user_register_view, post_create_view, post_list_view, com
     following_list_view, post_update_view, post_delete_view, comment_like_view, comment_delete_view, comment_edit_view, \
     comment_reply_view
 from django.contrib.auth.views import LoginView
+from django.contrib.auth import views as auth_views
 from django.urls import path
 from blog.old_views import *
 
@@ -33,5 +34,8 @@ urlpatterns = [
     path('comment/<int:comment_id>/delete/', comment_delete_view, name='comment_delete'),
     path('comment/<int:comment_id>/update/', comment_edit_view, name='comment_update'),
     path('comment/<int:comment_id>/reply/', comment_reply_view, name='comment_reply'),
+    path("password-reset/", auth_views.PasswordResetView.as_view(), name="password_reset"),
+    path("password-reset/done/", auth_views.PasswordResetDoneView.as_view(), name="password_reset_done"),
+    path("reset/<uidb64>/<token>/", auth_views.PasswordResetConfirmView.as_view(), name="password_reset_confirm"),
+    path("reset/done/", auth_views.PasswordResetCompleteView.as_view(), name="password_reset_complete"),
 ]
-
