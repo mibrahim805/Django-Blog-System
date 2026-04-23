@@ -6,9 +6,20 @@ from blog.models import Comment, Like, Notification, Post, CustomUser
 
 class PostEngagementTests(TestCase):
 	def setUp(self):
-		self.author = CustomUser.objects.create_user(username="author", password="pass12345")
-		self.user = CustomUser.objects.create_user(username="reader", password="pass12345")
+		self.author = CustomUser.objects.create_user(username="author", email="author@example.com", password="pass12345")
+		self.user = CustomUser.objects.create_user(username="reader", email="reader@example.com", password="pass12345")
 		self.post = Post.objects.create(title="Post 1", content="Body", author=self.author, is_published=True)
+		self.approved_comment = Comment.objects.create(
+			post=self.post,
+			user=self.user,
+			content="Approved comment",
+			is_approved=True,
+		)
+		self.pending_comment = Comment.objects.create(
+			post=self.post,
+			user=self.user,
+			content="Pending comment",
+		)
 
 	def test_user_can_like_and_unlike_post(self):
 		self.client.login(username="reader", password="pass12345")
@@ -28,6 +39,22 @@ class PostEngagementTests(TestCase):
 
 		self.assertRedirects(response, reverse("blog:home"))
 		self.assertTrue(Comment.objects.filter(post=self.post, user=self.user, content="Nice post").exists())
+
+	def test_only_approved_comments_show_on_home_feed(self):
+		self.client.login(username="reader", password="pass12345")
+		response = self.client.get(reverse("blog:home"))
+
+		self.assertContains(response, "Approved comment")
+		self.assertNotContains(response, "Pending comment")
+		self.assertContains(response, "Show Comments (1)")
+		self.assertContains(response, "All Comments (1)")
+
+	def test_only_approved_comments_show_on_my_posts_page(self):
+		self.client.login(username="author", password="pass12345")
+		response = self.client.get(reverse("blog:my_posts"))
+
+		self.assertContains(response, "Approved comment")
+		self.assertNotContains(response, "Pending comment")
 
 	def test_like_creates_notification_for_post_author(self):
 		self.client.login(username="reader", password="pass12345")
@@ -56,6 +83,7 @@ class PostEngagementTests(TestCase):
 		self.assertEqual(count_response.json()["unread_count"], 1)
 
 		self.client.get(reverse("blog:notifications_list"))
+		self.client.get(reverse("blog:mark_read", kwargs={"notification_id": Notification.objects.first().id}))
 		count_response_after_open = self.client.get(reverse("blog:notifications_unread_count"))
 		self.assertEqual(count_response_after_open.json()["unread_count"], 0)
 

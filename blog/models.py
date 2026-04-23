@@ -3,6 +3,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
+from ckeditor_uploader.fields import RichTextUploadingField
 
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
@@ -10,7 +11,7 @@ class CustomUser(AbstractUser):
 
 class Post(models.Model):
     title = models.CharField(max_length=200)
-    content = models.TextField()
+    content = RichTextUploadingField()
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -23,11 +24,16 @@ class Post(models.Model):
     def get_like_count(self):
         return self.like_set.filter(comment__isnull=True).count()
 
+    @property
+    def approved_comments(self):
+        return self.comments.filter(is_approved=True).select_related("user").order_by("created_at")
+
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    is_approved = models.BooleanField(default=False)
     parent_comment = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
@@ -73,6 +79,7 @@ class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     interested_in = models.ManyToManyField(Category, related_name='interested_users')
     not_interested_posts = models.ManyToManyField(Post, related_name='user_not_interested_posts')
+    saved_posts = models.ManyToManyField(Post, related_name='saved_posts')
 
     def __str__(self):
         return str(self.interested_in.all())
@@ -103,3 +110,12 @@ class NotInterestedPost(models.Model):
         return f"{self.user.username} not interested in {self.post.title}"
 
 
+class SavedPost(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="saved_posts")
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="saved_by_users")
+    created_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        unique_together = ("user", "post")
+        ordering = ["-created_at"]
+    def __str__(self):
+        return f"{self.user.username} saved {self.post.title}"

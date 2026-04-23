@@ -72,7 +72,7 @@ def user_register_view(request):
 @login_required
 def post_list_view(request):
     hidden_post_ids = NotInterestedPost.objects.filter(user=request.user).values_list("post_id", flat=True)
-    queryset = Post.objects.filter(is_published=True).exclude(id__in=hidden_post_ids).exclude(author=request.user)
+    queryset = Post.objects.filter(is_published=True).exclude(id__in=hidden_post_ids).order_by("-created_at")
     filter = PostFilter(request.GET, queryset=queryset)
     posts = filter.qs
 
@@ -103,13 +103,20 @@ def post_list_view(request):
 @login_required
 def post_create_view(request):
     if request.method == "POST":
+        # print("form valid")
         form = PostCreateForm(request.POST, request.FILES)
         if form.is_valid():
+            print("form valid")
             post = form.save(commit=False)
             post.author = request.user
-            print("before create",form.cleaned_data["category"])
             post.save()
-            print("after create",form.cleaned_data["category"])
+            form.save_m2m()
+        # else:
+        #     print("errors: ", form.errors)
+
+            selected_categories = form.cleaned_data.get("category")
+            if selected_categories is not None:
+                post.categories.set(selected_categories)
             if post.is_published:
                 users = CustomUser.objects.exclude(id=request.user.id)
                 for user in users:
@@ -122,26 +129,29 @@ def post_create_view(request):
 
 
 @login_required
-def post_update_view(request, post_id):
-    post = Post.objects.get(id=post_id)
+def post_update_view(request, pk):
+    post = Post.objects.get(id=pk)
     if request.method == "POST":
         form = PostCreateForm(request.POST, request.FILES, instance=post)
         if form.is_valid():
-            form.save()
+            post = form.save()
+            selected_categories = form.cleaned_data.get("category")
+            if selected_categories is not None:
+                post.categories.set(selected_categories)
             if post.is_published:
                 users = CustomUser.objects.exclude(id=request.user.id)
                 for user in users:
                     create_and_push_notification(user=user,post=post,sender=request.user,message=f"{request.user.username} updated a post.",)
             return redirect("blog:my_posts")
-        else:
-            form = PostCreateForm(instance=post)
+    else:
+        form = PostCreateForm(instance=post)
     return render(request, "post/post_create.html", {"form": form, "post": post})
 
 
 
 @login_required
-def post_delete_view(request, post_id):
-    post = Post.objects.get(id=post_id)
+def post_delete_view(request, pk):
+    post = Post.objects.get(id=pk)
     post.delete()
     return redirect("blog:my_posts")
 
@@ -156,11 +166,12 @@ def comment_createView(request, post_id):
             comment = form.save(commit=False)
             comment.user = request.user
             comment.post = post
+            comment.is_approved = False
             comment.save()
             if post.author != request.user:
                 create_and_push_notification(user=post.author,post=post,sender=request.user,message=f"{request.user.username} commented on your post.",)
 
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.post.get('ajax'):
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.POST.get('ajax'):
                 return JsonResponse({'success': True, 'comment_id': comment.id, 'message': 'Comment posted successfully'})
             return redirect("blog:home")
 
@@ -221,7 +232,7 @@ def comment_reply_view(request, comment_id):
             comment.save()
             if parent_comment.user != request.user:
                 create_and_push_notification(user=parent_comment.user,post=parent_comment.post,sender=request.user,message=f"{request.user.username} replied to your comment.",)
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.post.get('ajax'):
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.POST.get('ajax'):
                 return JsonResponse({'success': True, 'comment_id': comment.id, 'message': 'Reply posted successfully'})
             return redirect("blog:home")
 
@@ -327,7 +338,7 @@ def user_follow_view(request, user_id):
         Follow.objects.create(follower=follower, following=following)
         if following != request.user:
             create_and_push_notification(user=following,post=None,sender=request.user,message=f"{request.user.username} started following you.",)
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.post.get('ajax'):
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.POST.get('ajax'):
                 return JsonResponse({'success': True, 'message': 'User followed successfully'})
     return redirect("blog:other_user_profile")
 
@@ -369,4 +380,12 @@ def not_interested_post_list_view(request):
     posts = NotInterestedPost.objects.filter(user=request.user).order_by("-created_at")
     return render(request, "post/not_interested_posts.html", {"posts": posts})
 
+
+
+@login_required
+def save_post_view(request, post_id):
+    if request.method == "POST":
+        post = get_object_or_404(Post, id=post_id)
+        SavedPosts.objects.create(user=request.user, post=post)
+        return redirect("blog:home")
 

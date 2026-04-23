@@ -1,4 +1,3 @@
-                    <span class="category-chip empty">Category: Uncategorized</span>
 {#{% extends "base.html" %}#}
 {##}
 {#{% block content %}#}
@@ -497,15 +496,25 @@
             <!-- Post Content -->
             <h3 class="post-title">{{ post.title }}</h3>
             <div class="post-category">
-                {% if post.category.all %}
-                    {% for cat in post.category.all %}
-                        <span class="category-chip">Category: {{ cat.name }}</span>
-                    {% endfor %}
-                {% else %}
-                    <span class="category-chip empty">Category: Uncategorized</span>
-                {% endif %}
+                {% with primary_categories=post.category.all %}
+                    {% if primary_categories %}
+                        {% for category in primary_categories %}
+                            <span class="category-chip">Category: {{ category.name }}</span>
+                        {% endfor %}
+                    {% else %}
+                        {% with fallback_categories=post.categories.all %}
+                            {% if fallback_categories %}
+                                {% for category in fallback_categories %}
+                                    <span class="category-chip">Category: {{ category.name }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <span class="category-chip empty">Category: Uncategorized</span>
+                            {% endif %}
+                        {% endwith %}
+                    {% endif %}
+                {% endwith %}
             </div>
-            <p class="post-content">{{ post.content }}</p>
+            <p class="post-content">{{ post.content |safe }}</p>
 
             <!-- Post Stats -->
             <div class="post-stats">
@@ -515,7 +524,7 @@
                 </div>
                 <div class="post-stat-item">
                     <span>💬</span>
-                    <span><strong>{{ post.comments.count }}</strong> {{ post.comments.count|pluralize:"Comment,Comments" }}</span>
+                    <span><strong>{{ post.approved_comments.count }}</strong> {{ post.approved_comments.count|pluralize:"Comment,Comments" }}</span>
                 </div>
             </div>
 
@@ -540,10 +549,10 @@
             </div>
 
             <!-- Comments Section -->
-            {% if post.comments.all %}
+            {% if post.approved_comments.all %}
                 <div class="comments-section">
                     <div class="comments-title">Recent Comments</div>
-                    {% for comment in post.comments.all|slice:":3" %}
+                    {% for comment in post.approved_comments.all|slice:":3" %}
                         <div class="comment-item">
                             <div class="comment-author">{{ comment.user.username }}</div>
                             <p class="comment-text">{{ comment.content }}</p>

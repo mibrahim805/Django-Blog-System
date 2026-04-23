@@ -25,9 +25,15 @@ SECRET_KEY = 'django-insecure-v3w37g0hc(4aqmk99duflx1$sjqn@=snjh3a66+xs3*-gc6mpx
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    ".ngrok-free.dev"
+]
 
-
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.ngrok-free.dev"
+]
 # Application definition
 
 INSTALLED_APPS = [
@@ -39,6 +45,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_filters',
+    'ckeditor',
+    'ckeditor_uploader',
     'channels',
     'blog',
 ]
@@ -138,6 +146,12 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "mibrahimjutt1266@gmail.com"
 EMAIL_HOST_PASSWORD = "hydr ikxy fpfq hcvy"
 
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+
+CKEDITOR_UPLOAD_PATH = "uploads/"
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 

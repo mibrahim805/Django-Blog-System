@@ -1,421 +1,619 @@
+{#{% extends "base.html" %}#}
+{##}
+{#{% block content %}#}
+{##}
+{#<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">#}
+{##}
+{#<style>#}
+{#    body {#}
+{#        background-color: #f8f9fa;#}
+{#    }#}
+{##}
+{#    .create-post-container {#}
+{#        max-width: 800px;#}
+{#        margin: 0 auto;#}
+{#        padding: 20px;#}
+{#    }#}
+{##}
+{#    .page-header {#}
+{#        margin-bottom: 30px;#}
+{#        border-bottom: 1px solid #ddd;#}
+{#        padding-bottom: 10px;#}
+{#    }#}
+{##}
+{#    .form-card {#}
+{#        background: #fff;#}
+{#        padding: 30px;#}
+{#        border-radius: 10px;#}
+{#        box-shadow: 0 2px 12px rgba(0,0,0,0.08);#}
+{#    }#}
+{##}
+{#    .form-group {#}
+{#        margin-bottom: 20px;#}
+{#    }#}
+{##}
+{#    .form-label {#}
+{#        font-weight: 600;#}
+{#        margin-bottom: 8px;#}
+{#        display: block;#}
+{#    }#}
+{##}
+{#    .form-control,#}
+{#    .form-select {#}
+{#        width: 100%;#}
+{#        padding: 10px;#}
+{#        border-radius: 6px;#}
+{#        border: 1px solid #ccc;#}
+{#    }#}
+{##}
+{#    .form-control:focus,#}
+{#    .form-select:focus {#}
+{#        border-color: #667eea;#}
+{#        outline: none;#}
+{#        box-shadow: 0 0 0 0.2rem rgba(102,126,234,0.2);#}
+{#    }#}
+{##}
+{#    .errorlist {#}
+{#        color: red;#}
+{#        font-size: 13px;#}
+{#        margin-top: 5px;#}
+{#        list-style: none;#}
+{#        padding: 0;#}
+{#    }#}
+{##}
+{#    .form-footer {#}
+{#        display: flex;#}
+{#        gap: 10px;#}
+{#        margin-top: 25px;#}
+{#    }#}
+{##}
+{#    .btn-primary {#}
+{#        background: #667eea;#}
+{#        border: none;#}
+{#        padding: 10px 20px;#}
+{#        color: white;#}
+{#        border-radius: 6px;#}
+{#        cursor: pointer;#}
+{#    }#}
+{##}
+{#    .btn-primary:hover {#}
+{#        background: #5a67d8;#}
+{#    }#}
+{##}
+{#    .btn-cancel {#}
+{#        background: #e2e8f0;#}
+{#        padding: 10px 20px;#}
+{#        border-radius: 6px;#}
+{#        text-decoration: none;#}
+{#        color: #333;#}
+{#    }#}
+{##}
+{#    .btn-cancel:hover {#}
+{#        background: #cbd5e0;#}
+{#    }#}
+{#</style>#}
+{##}
+{#<div class="create-post-container">#}
+{##}
+{#    <div class="page-header">#}
+{#        <h2>Create New Post</h2>#}
+{#        <p>Share your thoughts with the community</p>#}
+{#    </div>#}
+{##}
+{#    <div class="form-card">#}
+{#        {{ form.media }}#}
+{#        <form method="post" enctype="multipart/form-data">#}
+{#            {% csrf_token %}#}
+{##}
+{#            <!-- Title -->#}
+{#            <div class="form-group">#}
+{#                <label class="form-label">{{ form.title.label }}</label>#}
+{#                {{ form.title }}#}
+{##}
+{#                {% if form.title.errors %}#}
+{#                    <ul class="errorlist">#}
+{#                        {% for error in form.title.errors %}#}
+{#                            <li>{{ error }}</li>#}
+{#                        {% endfor %}#}
+{#                    </ul>#}
+{#                {% endif %}#}
+{#            </div>#}
+{##}
+{#            <!-- Content (CKEditor) -->#}
+{#            <div class="form-group">#}
+{#                <label class="form-label">{{ form.content.label }}</label>#}
+{#                {{ form.content }}#}
+{##}
+{#                {% if form.content.errors %}#}
+{#                    <ul class="errorlist">#}
+{#                        {% for error in form.content.errors %}#}
+{#                            <li>{{ error }}</li>#}
+{#                        {% endfor %}#}
+{#                    </ul>#}
+{#                {% endif %}#}
+{#            </div>#}
+{##}
+{#            <!-- Category -->#}
+{#            <div class="form-group">#}
+{#                <label class="form-label">{{ form.category.label }}</label>#}
+{#                {{ form.category }}#}
+{##}
+{#                {% if form.category.errors %}#}
+{#                    <ul class="errorlist">#}
+{#                        {% for error in form.category.errors %}#}
+{#                            <li>{{ error }}</li>#}
+{#                        {% endfor %}#}
+{#                    </ul>#}
+{#                {% endif %}#}
+{#            </div>#}
+{##}
+{#            <!-- Publish -->#}
+{#            <div class="form-group">#}
+{#                <label>#}
+{#                    {{ form.is_published }} {{ form.is_published.label }}#}
+{#                </label>#}
+{#            </div>#}
+{##}
+{#            <!-- Buttons -->#}
+{#            <div class="form-footer">#}
+{#                <button type="submit" class="btn-primary">Create Post</button>#}
+{#                <a href="{% url 'blog:my_posts' %}" class="btn-cancel">Cancel</a>#}
+{#            </div>#}
+{##}
+{#        </form>#}
+{##}
+{#    </div>#}
+{#</div>#}
+{##}
+{#{% endblock %}#}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 {% extends "base.html" %}
-
 {% block content %}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 <style>
-    :root {
-        --primary-color: #667eea;
-        --secondary-color: #764ba2;
-        --light-bg: #f8f9fa;
-        --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-    }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
-        background-color: var(--light-bg);
-    }
+  body {
+    background: #f0f2f5;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
 
-    .create-post-container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
-    }
+  /* ── Dimmed backdrop – always visible on this page ── */
+  .fb-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    padding: 16px;
+  }
 
-    .page-header {
-        margin-bottom: 40px;
-        padding-bottom: 20px;
-        border-bottom: 2px solid #e9ecef;
-    }
+  /* ── Modal card ── */
+  .fb-modal {
+    background: #fff;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 548px;
+    max-height: 95vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 24px rgba(0,0,0,.3);
+    animation: popIn .2s ease;
+  }
+  @keyframes popIn {
+    from { transform: translateY(-16px); opacity: 0; }
+    to   { transform: translateY(0);     opacity: 1; }
+  }
+  .fb-modal::-webkit-scrollbar { width: 6px; }
+  .fb-modal::-webkit-scrollbar-thumb { background: #c8cacd; border-radius: 3px; }
 
-    .page-header h1 {
-        font-size: 32px;
-        font-weight: 700;
-        color: #2d3748;
-        margin: 0;
-    }
+  /* Header */
+  .fb-modal-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid #e4e6eb;
+  }
+  .fb-modal-header h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #050505;
+  }
+  .fb-close-btn {
+    position: absolute;
+    right: 12px;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: #e4e6eb;
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    color: #050505;
+    text-decoration: none;
+    transition: background .15s;
+  }
+  .fb-close-btn:hover { background: #d8dadf; }
 
-    .page-header p {
-        color: #718096;
-        font-size: 14px;
-        margin: 8px 0 0 0;
-    }
+  /* Body */
+  .fb-modal-body { padding: 12px 16px 16px; }
 
-    .form-card {
-        background: white;
-        border-radius: 12px;
-        padding: 32px;
-        box-shadow: var(--card-shadow);
-    }
+  /* User row */
+  .user-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .user-avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: #1877f2;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .user-meta strong {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    color: #050505;
+  }
+  .audience-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #e4e6eb;
+    border: none;
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #050505;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 3px;
+  }
+  .audience-btn i { font-size: 10px; }
 
-    .form-group {
-        margin-bottom: 24px;
-    }
+  /* Title – large ghost input */
+  .field-wrap { margin-bottom: 2px; }
 
-    .form-label {
-        font-weight: 600;
-        color: #2d3748;
-        margin-bottom: 10px;
-        display: block;
-        font-size: 14px;
-    }
+  #id_title {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 23px;
+    font-family: inherit;
+    color: #050505;
+    background: transparent;
+    padding: 4px 0 10px;
+    border-bottom: 1px solid #e4e6eb;
+    margin-bottom: 2px;
+  }
+  #id_title::placeholder { color: #bcc0c4; }
 
-    .form-control,
-    .form-select {
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 12px 15px;
-        font-size: 14px;
-        transition: all 0.3s ease;
-        font-family: inherit;
-    }
+  /* Content textarea */
+  #id_content,
+  .fb-modal textarea {
+    width: 100%;
+    border: none;
+    outline: none;
+    resize: none;
+    font-size: 18px;
+    font-family: inherit;
+    color: #050505;
+    background: transparent;
+    min-height: 90px;
+    padding: 10px 0;
+    line-height: 1.5;
+  }
+  #id_content::placeholder,
+  .fb-modal textarea::placeholder { color: #bcc0c4; }
 
-    .form-control:focus,
-    .form-select:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-        outline: none;
-    }
+  /* CKEditor */
+  .django-ckeditor-widget,
+  .ck-editor__editable {
+    border: none !important;
+    box-shadow: none !important;
+    font-size: 18px !important;
+    font-family: inherit !important;
+    min-height: 90px;
+    padding: 10px 0 !important;
+  }
 
-    .form-control.is-invalid,
-    .form-select.is-invalid {
-        border-color: #dc3545;
-    }
+  /* Category */
+  .fb-field-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #65676b;
+    margin-bottom: 5px;
+    display: block;
+  }
+  .fb-select-wrap { position: relative; }
+  .fb-select-wrap select,
+  #id_category {
+    width: 100%;
+    padding: 9px 36px 9px 12px;
+    border: 1px solid #e4e6eb;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #050505;
+    background: #f0f2f5;
+    appearance: none;
+    cursor: pointer;
+    font-family: inherit;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .fb-select-wrap select:focus,
+  #id_category:focus {
+    border-color: #1877f2;
+    box-shadow: 0 0 0 2px rgba(24,119,242,.2);
+  }
+  .fb-select-wrap::after {
+    content: "\f107";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    position: absolute;
+    right: 12px; top: 50%;
+    transform: translateY(-50%);
+    color: #65676b;
+    pointer-events: none;
+  }
 
-    .form-control.is-invalid:focus,
-    .form-select.is-invalid:focus {
-        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
-    }
+  /* Divider */
+  .fb-divider {
+    border: none;
+    border-top: 1px solid #e4e6eb;
+    margin: 14px 0;
+  }
 
-    textarea.form-control {
-        resize: vertical;
-        min-height: 200px;
-        line-height: 1.6;
-    }
+  /* Add to post row */
+  .add-to-post {
+    border: 1px solid #e4e6eb;
+    border-radius: 8px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .add-to-post-label {
+    font-size: 15px;
+    font-weight: 600;
+    color: #050505;
+  }
+  .add-icons { display: flex; gap: 2px; }
+  .add-icon-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    transition: background .15s;
+  }
+  .add-icon-btn:hover { background: #f0f2f5; }
 
-    .form-text {
-        display: block;
-        color: #6c757d;
-        font-size: 12px;
-        margin-top: 6px;
-    }
+  /* Publish toggle */
+  .publish-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .publish-row-label {
+    font-size: 15px;
+    font-weight: 600;
+    color: #050505;
+  }
+  .fb-toggle { position: relative; display: inline-block; width: 44px; height: 24px; }
+  .fb-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+  .fb-slider {
+    position: absolute; inset: 0;
+    background: #bcc0c4;
+    border-radius: 24px;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .fb-slider::before {
+    content: "";
+    position: absolute;
+    width: 20px; height: 20px;
+    left: 2px; top: 2px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform .2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,.3);
+  }
+  .fb-toggle input:checked + .fb-slider { background: #1877f2; }
+  .fb-toggle input:checked + .fb-slider::before { transform: translateX(20px); }
 
-    .invalid-feedback {
-        display: block;
-        color: #dc3545;
-        font-size: 13px;
-        margin-top: 6px;
-    }
+  /* Error list */
+  .fb-errors { list-style: none; padding: 0; margin: 4px 0 8px; }
+  .fb-errors li {
+    font-size: 12px;
+    color: #fa3e3e;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
 
-    .errorlist {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .errorlist li {
-        color: #dc3545;
-        font-size: 13px;
-        margin-bottom: 4px;
-    }
-
-    .form-error-box {
-        background-color: #f8d7da;
-        border: 1px solid #f5c6cb;
-        border-radius: 8px;
-        padding: 14px 16px;
-        margin-bottom: 20px;
-        color: #721c24;
-    }
-
-    .form-error-box strong {
-        display: block;
-        margin-bottom: 8px;
-    }
-
-    .form-footer {
-        display: flex;
-        gap: 12px;
-        margin-top: 32px;
-        padding-top: 24px;
-        border-top: 1px solid #e2e8f0;
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-        border: none;
-        color: white;
-        padding: 12px 28px;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 14px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-        color: white;
-    }
-
-    .btn-primary:active {
-        transform: translateY(0);
-    }
-
-    .btn-cancel {
-        background-color: #e2e8f0;
-        border: none;
-        color: #4a5568;
-        padding: 12px 28px;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 14px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .btn-cancel:hover {
-        background-color: #cbd5e0;
-        color: #2d3748;
-    }
-
-    .checkbox-group {
-        display: flex;
-        gap: 16px;
-        margin-top: 12px;
-    }
-
-    .form-check {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .form-check-input {
-        width: 18px;
-        height: 18px;
-        margin-top: 0;
-        cursor: pointer;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        transition: all 0.3s ease;
-    }
-
-    .form-check-input:checked {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
-    }
-
-    .form-check-input:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-    }
-
-    .form-check-label {
-        margin-bottom: 0;
-        cursor: pointer;
-        font-weight: 500;
-        color: #2d3748;
-        font-size: 14px;
-    }
-
-    .char-count {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-top: 8px;
-        font-size: 12px;
-        color: #718096;
-    }
-
-    .char-count-meter {
-        flex: 1;
-        height: 6px;
-        background-color: #e2e8f0;
-        border-radius: 3px;
-        margin: 0 12px;
-        overflow: hidden;
-    }
-
-    .char-count-bar {
-        height: 100%;
-        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-        border-radius: 3px;
-        transition: width 0.2s ease;
-        width: 0%;
-    }
-
-    @media (max-width: 600px) {
-        .create-post-container {
-            padding: 12px;
-        }
-
-        .form-card {
-            padding: 20px;
-        }
-
-        .page-header h1 {
-            font-size: 24px;
-        }
-
-        .form-footer {
-            flex-direction: column;
-        }
-
-        .btn-primary,
-        .btn-cancel {
-            width: 100%;
-            justify-content: center;
-        }
-    }
+  /* Post button */
+  .fb-post-btn {
+    width: 100%;
+    padding: 10px;
+    background: #1877f2;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .fb-post-btn:hover { background: #166fe5; }
+  .fb-post-btn:active { background: #1465d8; }
+  .fb-post-btn:disabled {
+    background: #e4e6eb;
+    color: #bcc0c4;
+    cursor: not-allowed;
+  }
 </style>
 
-<div class="create-post-container">
-    <!-- Page Header -->
-    <div class="page-header">
-        <h1>✍️ Create New Post</h1>
-        <p>Share your thoughts with the community</p>
+<div class="fb-backdrop">
+  <div class="fb-modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+
+    <!-- Header -->
+    <div class="fb-modal-header">
+      <h2 id="modalTitle">Create post</h2>
+      <a href="{% url 'blog:my_posts' %}" class="fb-close-btn" aria-label="Close">
+        <i class="fa-solid fa-xmark"></i>
+      </a>
     </div>
 
-    <!-- Form Card -->
-    <div class="form-card">
-        <!-- Error Messages -->
-        {% if form.non_field_errors %}
-            <div class="form-error-box">
-                <strong>⚠️ Please fix the following errors:</strong>
-                {% for error in form.non_field_errors %}
-                    <div>{{ error }}</div>
-                {% endfor %}
-            </div>
-        {% endif %}
+    <!-- Body -->
+    <div class="fb-modal-body">
 
-        <form method="post" novalidate>
-            {% csrf_token %}
+      <!-- User row -->
+      <div class="user-row">
+        <div class="user-avatar">U</div>
+        <div class="user-meta">
+          <strong>Your Name</strong>
+          <button class="audience-btn" type="button">
+            <i class="fa-solid fa-earth-americas"></i> Public <i class="fa-solid fa-caret-down"></i>
+          </button>
+        </div>
+      </div>
 
-            <!-- Title Field -->
-            <div class="form-group">
-                <label for="{{ form.title.id_for_label }}" class="form-label">{{ form.title.label }}</label>
-                {{ form.title }}
-                {% if form.title.errors %}
-                    <div class="errorlist">
-                        {% for error in form.title.errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-                <span class="form-text">Give your post a clear, descriptive title</span>
-            </div>
+      {{ form.media }}
+      <form method="post" enctype="multipart/form-data" id="createPostForm">
+        {% csrf_token %}
 
-            <!-- Content Field -->
-            <div class="form-group">
-                <label for="{{ form.content.id_for_label }}" class="form-label">{{ form.content.label }}</label>
-                {{ form.content }}
-                {% if form.content.errors %}
-                    <div class="errorlist">
-                        {% for error in form.content.errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-                <div class="char-count">
-                    <span>Word count: <strong id="word-count">0</strong></span>
-                    <div class="char-count-meter">
-                        <div class="char-count-bar" id="char-count-bar"></div>
-                    </div>
-                    <span id="char-display">0</span>
-                </div>
-            </div>
+        <!-- Title -->
+        <div class="field-wrap">
+          {{ form.title }}
+          {% if form.title.errors %}
+            <ul class="fb-errors">
+              {% for error in form.title.errors %}
+                <li><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
 
-            <!-- Category Field -->
-            <div class="form-group">
-                <label for="{{ form.category.id_for_label }}" class="form-label">{{ form.category.label }}</label>
-                {{ form.category }}
-                {% if form.category.errors %}
-                    <div class="errorlist">
-                        {% for error in form.category.errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-                <span class="form-text">Select the category that best fits your post</span>
-            </div>
+        <!-- Content -->
+        <div class="field-wrap">
+          {{ form.content }}
+          {% if form.content.errors %}
+            <ul class="fb-errors">
+              {% for error in form.content.errors %}
+                <li><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
 
-            <!-- Publish Options -->
-            <div class="form-group">
-                <label class="form-label">📤 Publishing Options</label>
-                <div class="checkbox-group">
-                    <div class="form-check">
-                        {{ form.is_published }}
-                        <label for="{{ form.is_published.id_for_label }}" class="form-check-label">
-                            {{ form.is_published.label }}
-                        </label>
-                    </div>
-                </div>
-                <span class="form-text">Published posts are visible to everyone. Uncheck to save as a draft.</span>
-            </div>
+        <hr class="fb-divider">
 
-            <!-- Form Footer -->
-            <div class="form-footer">
-                <button type="submit" class="btn-primary">
-                    ✅ Create Post
-                </button>
-                <a href="{% url 'blog:my_posts' %}" class="btn-cancel">
-                    ❌ Cancel
-                </a>
-            </div>
-        </form>
+        <!-- Category -->
+        <div class="field-wrap" style="margin-bottom:14px;">
+          <label class="fb-field-label">{{ form.category.label }}</label>
+          <div class="fb-select-wrap">
+            {{ form.category }}
+          </div>
+          {% if form.category.errors %}
+            <ul class="fb-errors">
+              {% for error in form.category.errors %}
+                <li><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+
+        <!-- Add to your post -->
+        <div class="add-to-post">
+          <span class="add-to-post-label">Add to your post</span>
+          <div class="add-icons">
+            <button type="button" class="add-icon-btn" title="Photo / Video">
+              <i class="fa-solid fa-image" style="color:#45bd62;"></i>
+            </button>
+            <button type="button" class="add-icon-btn" title="Tag people">
+              <i class="fa-solid fa-user-tag" style="color:#1877f2;"></i>
+            </button>
+            <button type="button" class="add-icon-btn" title="Feeling / Activity">
+              <i class="fa-solid fa-face-smile" style="color:#f7b928;"></i>
+            </button>
+            <button type="button" class="add-icon-btn" title="Check in">
+              <i class="fa-solid fa-location-dot" style="color:#f02849;"></i>
+            </button>
+            <button type="button" class="add-icon-btn" title="More options">
+              <i class="fa-solid fa-ellipsis" style="color:#65676b;"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Publish toggle -->
+        <div class="publish-row">
+          <span class="publish-row-label">{{ form.is_published.label }}</span>
+          <label class="fb-toggle">
+            {{ form.is_published }}
+            <span class="fb-slider"></span>
+          </label>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="fb-post-btn" id="postBtn">Post</button>
+
+      </form>
     </div>
+  </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const titleInput = document.querySelector('input[name="title"]');
-        const contentInput = document.querySelector('textarea[name="content"]');
-        const wordCountEl = document.getElementById('word-count');
-        const charDisplayEl = document.getElementById('char-display');
-        const charCountBar = document.getElementById('char-count-bar');
+  // Hide raw checkbox (toggle replaces it visually)
+  const cb = document.querySelector('#createPostForm input[type="checkbox"]');
+  if (cb) cb.style.cssText = 'opacity:0;width:0;height:0;position:absolute;';
 
-        // Add Bootstrap classes to form inputs
-        titleInput?.classList.add('form-control');
-        contentInput?.classList.add('form-control');
-        document.querySelector('select[name="category"]')?.classList.add('form-select');
-        document.querySelector('input[type="checkbox"][name="is_published"]')?.classList.add('form-check-input');
-
-        // Add error styling
-        if (titleInput?.parentElement.querySelector('.errorlist')) {
-            titleInput?.classList.add('is-invalid');
-        }
-        if (contentInput?.parentElement.querySelector('.errorlist')) {
-            contentInput?.classList.add('is-invalid');
-        }
-
-        // Word and character counter
-        function updateCount() {
-            const text = contentInput?.value || '';
-            const charCount = text.length;
-            const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
-            
-            wordCountEl.textContent = wordCount;
-            charDisplayEl.textContent = charCount;
-
-            // Update progress bar (max 5000 characters)
-            const maxChars = 5000;
-            const percentage = Math.min((charCount / maxChars) * 100, 100);
-            charCountBar.style.width = percentage + '%';
-        }
-
-        contentInput?.addEventListener('input', updateCount);
-        contentInput?.addEventListener('change', updateCount);
-
-        // Initial count
-        updateCount();
+  // Auto-grow plain textareas
+  document.querySelectorAll('textarea').forEach(ta => {
+    ta.style.overflow = 'hidden';
+    ta.addEventListener('input', function () {
+      this.style.height = 'auto';
+      this.style.height = this.scrollHeight + 'px';
     });
+  });
+
+  // Disable Post button on submit (prevent double-submit)
+  document.getElementById('createPostForm').addEventListener('submit', function () {
+    const btn = document.getElementById('postBtn');
+    btn.disabled = true;
+    btn.textContent = 'Posting…';
+  });
 </script>
+
 {% endblock %}

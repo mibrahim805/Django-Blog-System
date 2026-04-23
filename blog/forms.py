@@ -1,3 +1,4 @@
+from ckeditor_uploader.widgets import CKEditorUploadingWidget
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 
@@ -10,6 +11,7 @@ class RegistrationForm(UserCreationForm):
         fields=["username" ,"email","password1","password2"]
 
 class PostCreateForm(forms.ModelForm):
+    content = forms.CharField(widget=CKEditorUploadingWidget())
     class Meta:
         model=Post
         fields=["title","content", "is_published","category"]
