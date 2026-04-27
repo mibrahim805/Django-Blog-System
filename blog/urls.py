@@ -2,7 +2,7 @@ from blog.views import user_register_view, post_create_view, post_list_view, com
     like_view, notifications_list_view, mark_as_read_view, mark_all_as_read_view, unread_notifications_count_view, \
     select_interest_view, my_posts_view, my_profile_view, other_user_profile_view, user_follow_view, follower_list_view, \
     following_list_view, post_update_view, post_delete_view, comment_like_view, comment_delete_view, comment_edit_view, \
-    comment_reply_view
+    comment_reply_view, save_post_view, saved_post_list_view, friends_list_view, category_list_view
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import views as auth_views
 from django.urls import path
@@ -38,4 +38,8 @@ urlpatterns = [
     path("password-reset/done/", auth_views.PasswordResetDoneView.as_view(), name="password_reset_done"),
     path("reset/<uidb64>/<token>/", auth_views.PasswordResetConfirmView.as_view(), name="password_reset_confirm"),
     path("reset/done/", auth_views.PasswordResetCompleteView.as_view(), name="password_reset_complete"),
+    path('post/<int:post_id>/save/', save_post_view, name='save_post'),
+    path('saved_posts/', saved_post_list_view, name='saved_posts'),
+    path('friends/', friends_list_view, name='friends_list'),
+    path('categories/', category_list_view, name='category_list'),
 ]

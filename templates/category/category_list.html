@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Categories - Blog System{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 900px; margin-top: 30px;">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="mb-2" style="font-weight: 700; color: #2d3748;">Browse Categories</h1>
+            <p class="text-muted mb-0">Explore posts organized by topics</p>
+        </div>
+        <a href="{% url 'blog:home' %}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left"></i> Back to Feed
+        </a>
+    </div>
+
+    <!-- Categories Grid -->
+    {% if categories %}
+        <div class="row g-3">
+            {% for category in categories %}
+                <div class="col-md-6">
+                    <div class="card h-100 shadow-sm border-0 transition-all" style="cursor: pointer; transition: all 0.3s ease;">
+                        <div class="card-body">
+                            <div class="d-flex align-items-start justify-content-between">
+                                <div class="flex-grow-1">
+                                    <h5 class="card-title mb-2">
+                                        <i class="fas fa-tag text-primary me-2"></i>
+                                        {{ category.name }}
+                                    </h5>
+                                    <p class="text-muted small mb-3">
+                                        <strong>{{ category.posts.all|length }}</strong>
+                                        post{% if category.posts.all|length != 1 %}s{% endif %}
+                                    </p>
+                                </div>
+                                <span class="badge bg-primary rounded-pill">
+                                    {{ category.posts.all|length }}
+                                </span>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'blog:home' %}?categories={{ category.id }}"
+                                   class="btn btn-sm btn-primary">
+                                    View Posts
+                                    <i class="fas fa-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Additional Info -->
+        <div class="alert alert-info mt-5 mb-0" role="alert">
+            <i class="fas fa-info-circle me-2"></i>
+            Total: <strong>{{ categories|length }}</strong> categories available
+        </div>
+    {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="fas fa-inbox" style="font-size: 48px; color: #cbd5e0;"></i>
+            </div>
+            <h4 class="text-muted mb-2">No Categories Yet</h4>
+            <p class="text-muted small mb-4">There are currently no categories available.</p>
+            <a href="{% url 'blog:home' %}" class="btn btn-primary">
+                Go to Feed
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .transition-all:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15) !important;
+    }
+
+    .card {
+        border-radius: 12px;
+    }
+
+    .badge {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+</style>
+{% endblock %}
+

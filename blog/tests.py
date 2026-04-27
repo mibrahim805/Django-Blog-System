@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
 
-from blog.models import Comment, Like, Notification, Post, CustomUser
+from blog.models import Comment, Like, Notification, Post, CustomUser, SavedPost
 
 
 class PostEngagementTests(TestCase):
@@ -46,8 +46,7 @@ class PostEngagementTests(TestCase):
 
 		self.assertContains(response, "Approved comment")
 		self.assertNotContains(response, "Pending comment")
-		self.assertContains(response, "Show Comments (1)")
-		self.assertContains(response, "All Comments (1)")
+		self.assertContains(response, "1 comment")
 
 	def test_only_approved_comments_show_on_my_posts_page(self):
 		self.client.login(username="author", password="pass12345")
@@ -86,6 +85,31 @@ class PostEngagementTests(TestCase):
 		self.client.get(reverse("blog:mark_read", kwargs={"notification_id": Notification.objects.first().id}))
 		count_response_after_open = self.client.get(reverse("blog:notifications_unread_count"))
 		self.assertEqual(count_response_after_open.json()["unread_count"], 0)
+
+	def test_user_can_save_and_unsave_post_via_ajax(self):
+		self.client.login(username="reader", password="pass12345")
+		url = reverse("blog:save_post", kwargs={"post_id": self.post.id})
+
+		first = self.client.post(url, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+		self.assertEqual(first.status_code, 200)
+		self.assertTrue(first.json()["success"])
+		self.assertTrue(first.json()["is_saved"])
+		self.assertTrue(SavedPost.objects.filter(user=self.user, post=self.post).exists())
+
+		second = self.client.post(url, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+		self.assertEqual(second.status_code, 200)
+		self.assertTrue(second.json()["success"])
+		self.assertFalse(second.json()["is_saved"])
+		self.assertFalse(SavedPost.objects.filter(user=self.user, post=self.post).exists())
+
+	def test_saved_posts_page_shows_saved_post(self):
+		SavedPost.objects.create(user=self.user, post=self.post)
+		self.client.login(username="reader", password="pass12345")
+
+		response = self.client.get(reverse("blog:saved_posts"))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, self.post.title)
 
 
 class AuthBackendTests(TestCase):

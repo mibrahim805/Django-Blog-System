@@ -119,3 +119,7 @@ class SavedPost(models.Model):
         ordering = ["-created_at"]
     def __str__(self):
         return f"{self.user.username} saved {self.post.title}"
+
+
+
+# class 

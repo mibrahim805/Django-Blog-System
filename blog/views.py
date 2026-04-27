@@ -1,3 +1,4 @@
+from BlogSystem2 import settings
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django .contrib.auth.decorators import login_required
@@ -5,7 +6,8 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from .filters import PostFilter
 from .forms import RegistrationForm, PostCreateForm, CommentForm, InterestForm
-from .models import Post, Notification, Profile, CustomUser, NotInterestedPost, Like, Comment, Category, Follow
+from .models import Post, Notification, Profile, CustomUser, NotInterestedPost, Like, Comment, Category, Follow, SavedPost
+from django.core.mail import send_mail
 
 
 def create_and_push_notification(*, user, post, sender, message):
@@ -87,6 +89,7 @@ def post_list_view(request):
             continue
     liked_posts = Like.objects.filter(user=request.user,comment__isnull=True).values_list("post_id", flat=True)
     liked_comments = Like.objects.filter(user=request.user, post__isnull=True).values_list("comment_id", flat=True)
+    saved_posts = SavedPost.objects.filter(user=request.user).values_list("post_id", flat=True)
     context = {
         "posts": posts,
         "filter": filter,
@@ -94,11 +97,20 @@ def post_list_view(request):
         "selected_category_ids": selected_category_ids,
         "liked_post_ids": list(liked_posts),
         "liked_comment_ids": list(liked_comments),
+        "saved_post_ids": list(saved_posts),
         "not_interested_form": NotInterestedPost.objects.filter(user=request.user),
     }
     return render(request, "post/post_list.html", context)
 
-
+# @login_required
+def send_email(request,post):
+    print("working subscription")
+    users = CustomUser.objects.filter(is_active=True).exclude(id=request.user.id)
+    for user in users:
+        # print("email working")
+        subject = f"New Post Published: {post.title}"
+        message = f"Dear {user.username},\n\nWe are pleased to inform you that a new post has been published on our website.\n\nTitle: {post.title}\n\nContent: {post.content[:100]}...\n\nClick here to view the post:\n\nBest regards,\nThe Blog Team"
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
 
 @login_required
 def post_create_view(request):
@@ -118,9 +130,18 @@ def post_create_view(request):
             if selected_categories is not None:
                 post.categories.set(selected_categories)
             if post.is_published:
+                send_email(request, post)
                 users = CustomUser.objects.exclude(id=request.user.id)
                 for user in users:
                     create_and_push_notification(user=user,post=post,sender=request.user,message=f"{request.user.username} published a new post.",)
+                # def send_email(post):
+                #     print("working subscription")
+                #     users = CustomUser.objects.filter(is_active=True).exclude(id=request.user.id)
+                #     for user in users:
+                #         print("email working")
+                #         subject = f"New Post Published: {post.title}"
+                #         message = f"Dear {user.username},\n\nWe are pleased to inform you that a new post has been published on our website.\n\nTitle: {post.title}\n\nContent: {post.content[:100]}...\n\nClick here to view the post: {post.get_absolute_url()}\n\nBest regards,\nThe Blog Team"
+                #         send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
 
             return redirect("blog:my_posts")
     else:
@@ -384,8 +405,37 @@ def not_interested_post_list_view(request):
 
 @login_required
 def save_post_view(request, post_id):
-    if request.method == "POST":
-        post = get_object_or_404(Post, id=post_id)
-        SavedPosts.objects.create(user=request.user, post=post)
+    post = get_object_or_404(Post, id=post_id)
+    SavedPost.objects.create(user=request.user, post=post)
+    is_saved = True
+    message = "Post saved to your list."
+    if request.method != "POST":
         return redirect("blog:home")
+
+
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return JsonResponse({"success": True, "is_saved": is_saved, "message": message})
+    return redirect("blog:home")
+
+
+@login_required
+def saved_post_list_view(request):
+    saved_posts = SavedPost.objects.filter(user=request.user).order_by("-created_at")
+    return render(request, "post/saved_posts.html", {"saved_posts": saved_posts})
+
+
+
+
+@login_required
+def friends_list_view(request):
+    following = CustomUser.objects.filter(followed_by_users__follower=request.user).distinct()
+    followers = CustomUser.objects.filter(following_users__following=request.user).distinct()
+    friends = following.intersection(followers)
+    return render(request, "profile/friends_list.html", {"friends": friends})
+
+
+@login_required
+def category_list_view(request):
+    categories = Category.objects.order_by("name")
+    return render(request, "category/category_list.html", {"categories": categories})
 

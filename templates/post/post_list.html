@@ -2573,11 +2573,11 @@
             <div class="fb-sidebar-icon"><i class="fas fa-plus-circle"></i></div>
             <span>Create Post</span>
         </a>
-        <a href="#" class="fb-sidebar-link">
+        <a href="{% url 'blog:saved_posts' %}" class="fb-sidebar-link">
             <div class="fb-sidebar-icon"><i class="fas fa-bookmark"></i></div>
             <span>Saved</span>
         </a>
-        <a href="#" class="fb-sidebar-link">
+        <a href="{% url 'blog:friends_list' %}" class="fb-sidebar-link">
             <div class="fb-sidebar-icon"><i class="fas fa-users"></i></div>
             <span>Friends</span>
         </a>
@@ -2585,13 +2585,13 @@
         <div class="fb-sidebar-divider"></div>
         <div class="fb-sidebar-label">Your shortcuts</div>
 
-        <a href="#" class="fb-sidebar-link">
+        <a href="{% url 'blog:category_list' %}" class="fb-sidebar-link">
             <div class="fb-sidebar-icon"><i class="fas fa-tags"></i></div>
             <span>Categories</span>
         </a>
-        <a href="#" class="fb-sidebar-link">
-            <div class="fb-sidebar-icon"><i class="fas fa-heart"></i></div>
-            <span>Liked Posts</span>
+        <a href="{% url 'blog:saved_posts' %}" class="fb-sidebar-link">
+            <div class="fb-sidebar-icon"><i class="fas fa-bookmark"></i></div>
+            <span>Saved Posts</span>
         </a>
     </aside>
 
@@ -2606,6 +2606,7 @@
                 <a href="{% url 'blog:create_post' %}" class="fb-create-post-input">
                     What's on your mind, {{ request.user.get_full_name|default:request.user.username }}?
                 </a>
+            </div>
 {#            </div>#}
 {#            <div class="fb-create-post-divider"></div>#}
 {#            <div class="fb-create-post-actions">#}
@@ -2622,17 +2623,17 @@
         </div>
 
         <!-- Stories row -->
-        <div class="stories-row">
-            <div class="story-card story-card-create">
-                <div class="story-create-icon"><i class="fas fa-plus"></i></div>
-                <span>Create Story</span>
-            </div>
-            <div class="story-card">
-                <div class="story-grad"></div>
-                <div class="story-avatar-ring">{{ request.user.username|first|upper }}</div>
-                <div class="story-label">Your Story</div>
-            </div>
-        </div>
+{#        <div class="stories-row">#}
+{#            <div class="story-card story-card-create">#}
+{#                <div class="story-create-icon"><i class="fas fa-plus"></i></div>#}
+{#                <span>Create Story</span>#}
+{#            </div>#}
+{#            <div class="story-card">#}
+{#                <div class="story-grad"></div>#}
+{#                <div class="story-avatar-ring">{{ request.user.username|first|upper }}</div>#}
+{#                <div class="story-label">Your Story</div>#}
+{#            </div>#}
+{#        </div>#}
 
 
         <!-- Posts -->
@@ -2666,11 +2667,19 @@
                                     <small>See fewer posts like this</small>
                                 </div>
                             </button>
-                            <button type="button" class="post-menu-item">
-                                <div class="menu-icon"><i class="fas fa-bookmark"></i></div>
+                            <button
+                                type="button"
+                                class="post-menu-item"
+                                id="save-post-btn-{{ post.id }}"
+                                data-saved="{% if post.id in saved_post_ids %}true{% else %}false{% endif %}"
+                                onclick="savePost({{ post.id }})"
+                            >
+                                <div class="menu-icon">
+                                    <i class="{% if post.id in saved_post_ids %}fas{% else %}far{% endif %} fa-bookmark"></i>
+                                </div>
                                 <div class="menu-text">
-                                    <span>Save post</span>
-                                    <small>Add this to your saved items</small>
+                                    <span>{% if post.id in saved_post_ids %}Unsave post{% else %}Save post{% endif %}</span>
+                                    <small>{% if post.id in saved_post_ids %}Remove from your saved items{% else %}Add this to your saved items{% endif %}</small>
                                 </div>
                             </button>
                             <button type="button" class="post-menu-item">
@@ -2949,6 +2958,86 @@
         form.classList.toggle('show');
         closeAllPostMenus();
     }
+    const savePostUrlTemplate = "{% url 'blog:save_post' 0 %}";
+
+    function savePost(postId) {
+        fetch(savePostUrlTemplate.replace('0', postId), {
+            method: "POST",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "X-CSRFToken": getCSRFToken(),
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                return;
+            }
+
+            const saveBtn = document.getElementById(`save-post-btn-${postId}`);
+            if (saveBtn) {
+                const icon = saveBtn.querySelector('.menu-icon i');
+                const title = saveBtn.querySelector('.menu-text span');
+                const subtitle = saveBtn.querySelector('.menu-text small');
+                saveBtn.setAttribute('data-saved', data.is_saved ? 'true' : 'false');
+
+                if (icon) {
+                    icon.className = `${data.is_saved ? 'fas' : 'far'} fa-bookmark`;
+                }
+                if (title) {
+                    title.textContent = data.is_saved ? 'Unsave post' : 'Save post';
+                }
+                if (subtitle) {
+                    subtitle.textContent = data.is_saved
+                        ? 'Remove from your saved items'
+                        : 'Add this to your saved items';
+                }
+            }
+
+            closeAllPostMenus();
+        })
+        .catch(error => {
+            console.error("Error:", error);
+        });
+    }
+    
+    function friendList() {
+        const friendList = document.getElementById('friend-list');
+        if (friendList.classList.contains('show')) {
+            friendList.classList.remove('show');
+        } else {
+            friendList.classList.add('show');
+        }
+    }
+    function categoryList() {
+        const categoryList = document.getElementById('category-list');
+        if (categoryList.classList.contains('show')) {
+            categoryList.classList.remove('show');
+        } else {
+            categoryList.classList.add('show');
+        }
+    }
+
+    function getCSRFToken() {
+        let cookieValue = null;
+        const name = "csrftoken";
+
+        if (document.cookie && document.cookie !== "") {
+            const cookies = document.cookie.split(";");
+
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+
+                if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+
+        return cookieValue;
+    }
+
 
     function cancelNotInterestedForm(postId) {
         const form = document.getElementById('not-interested-form-' + postId);
@@ -3140,6 +3229,7 @@ function handlePostLike(event, postId) {
     })
     .catch(err => console.log(err));
 }
+
 </script>
 {% endblock %}
     

@@ -28,7 +28,9 @@ DEBUG = True
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    ".ngrok-free.dev"
+    ".ngrok-free.dev",
+    "10.0.3.1/24 brd 10.0.3.255",
+    "*"
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -145,7 +147,7 @@ EMAIL_USE_TLS = True
 
 EMAIL_HOST_USER = "mibrahimjutt1266@gmail.com"
 EMAIL_HOST_PASSWORD = "hydr ikxy fpfq hcvy"
-
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
