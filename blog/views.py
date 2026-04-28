@@ -104,12 +104,10 @@ def post_list_view(request):
 
 # @login_required
 def send_email(request,post):
-    print("working subscription")
-    users = CustomUser.objects.filter(is_active=True).exclude(id=request.user.id)
+    users = CustomUser.objects.filter(is_active=True, following_users__following= request.user,followed_by_users__follower = request.user ).exclude(id=request.user.id)
     for user in users:
-        # print("email working")
         subject = f"New Post Published: {post.title}"
-        message = f"Dear {user.username},\n\nWe are pleased to inform you that a new post has been published on our website.\n\nTitle: {post.title}\n\nContent: {post.content[:100]}...\n\nClick here to view the post:\n\nBest regards,\nThe Blog Team"
+        message = f"Dear {user.username},\n\nWe are pleased to inform you that a new post has been published on our website by {request.user.username}.\n\nTitle: {post.title}\n\nBest regards,\nThe Blog Team"
         send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
 
 @login_required
@@ -123,8 +121,6 @@ def post_create_view(request):
             post.author = request.user
             post.save()
             form.save_m2m()
-        # else:
-        #     print("errors: ", form.errors)
 
             selected_categories = form.cleaned_data.get("category")
             if selected_categories is not None:
@@ -134,15 +130,6 @@ def post_create_view(request):
                 users = CustomUser.objects.exclude(id=request.user.id)
                 for user in users:
                     create_and_push_notification(user=user,post=post,sender=request.user,message=f"{request.user.username} published a new post.",)
-                # def send_email(post):
-                #     print("working subscription")
-                #     users = CustomUser.objects.filter(is_active=True).exclude(id=request.user.id)
-                #     for user in users:
-                #         print("email working")
-                #         subject = f"New Post Published: {post.title}"
-                #         message = f"Dear {user.username},\n\nWe are pleased to inform you that a new post has been published on our website.\n\nTitle: {post.title}\n\nContent: {post.content[:100]}...\n\nClick here to view the post: {post.get_absolute_url()}\n\nBest regards,\nThe Blog Team"
-                #         send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
-
             return redirect("blog:my_posts")
     else:
         form = PostCreateForm()
@@ -352,7 +339,7 @@ def other_user_profile_view(request, user_id):
 def user_follow_view(request, user_id):
     follower = request.user
     following = get_object_or_404(CustomUser, id=user_id)
-    follow = Follow.objects.get(follower=follower, following=following)
+    follow = Follow.objects.filter(follower=follower, following=following).first()
     if follow:
         follow.delete()
     else:
@@ -361,7 +348,7 @@ def user_follow_view(request, user_id):
             create_and_push_notification(user=following,post=None,sender=request.user,message=f"{request.user.username} started following you.",)
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.POST.get('ajax'):
                 return JsonResponse({'success': True, 'message': 'User followed successfully'})
-    return redirect("blog:other_user_profile")
+    return redirect("blog:other_profile", user_id=user_id)
 
 
 @login_required
