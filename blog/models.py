@@ -1,9 +1,11 @@
-# import Category
-# from django.contrib.auth.admin import UserAdmin
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from ckeditor_uploader.fields import RichTextUploadingField
+from django.urls import reverse
+
+
+
 
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
@@ -17,6 +19,9 @@ class Post(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     is_published = models.BooleanField(default=False)
     category = models.ManyToManyField("Category", blank=True)
+
+    def get_absolute_url(self):
+        return reverse("blog:post_detail", args=[str(self.id)])
 
     def __str__(self):
         return self.title

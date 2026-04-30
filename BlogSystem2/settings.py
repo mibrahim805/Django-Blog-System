@@ -25,6 +25,9 @@ SECRET_KEY = 'django-insecure-v3w37g0hc(4aqmk99duflx1$sjqn@=snjh3a66+xs3*-gc6mpx
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# Configure ASGI to use thread pool for sync operations (required for Daphne)
+ASGI_SYNC_CALLABLE_EXECUTOR = "threadpool"
+
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
@@ -34,7 +37,8 @@ ALLOWED_HOSTS = [
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://*.ngrok-free.dev"
+    "http://127.0.0.1:8000",
+    "http://localhost:8000",
 ]
 # Application definition
 
@@ -47,6 +51,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_filters',
+    'debug_toolbar',
+    'django.contrib.sitemaps',
     'ckeditor',
     'ckeditor_uploader',
     'channels',
@@ -61,6 +67,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'BlogSystem2.urls'
@@ -151,18 +158,37 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
-
+CKEDITOR_ALLOW_NONIMAGE_FILES = False
+CKEDITOR_RESTRICT_BY_USER = False
 
 CKEDITOR_UPLOAD_PATH = "uploads/"
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+# CKEDITOR_UPLOAD_SLUGIFY_FILENAME = True
+
+
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_SAMESITE = 'Lax'
+
+
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
 
 CHANNEL_LAYERS = {
     "default": {
@@ -170,3 +196,14 @@ CHANNEL_LAYERS = {
     },
 }
 
+
+CKEDITOR_UPLOAD_SLUGIFY_FILENAME = True
+CKEDITOR_BROWSE_SHOW_DIRS = True
+
+
+CKEDITOR_CONFIGS = {
+    'default': {
+        'filebrowserUploadUrl': '/ckeditor/upload/',
+        'filebrowserUploadMethod': 'form',
+    }
+}

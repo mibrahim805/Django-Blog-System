@@ -1,8 +1,10 @@
+from blog.feeds import LatestPostsFeed
 from blog.views import user_register_view, post_create_view, post_list_view, comment_createView, not_interested_view, \
     like_view, notifications_list_view, mark_as_read_view, mark_all_as_read_view, unread_notifications_count_view, \
     select_interest_view, my_posts_view, my_profile_view, other_user_profile_view, user_follow_view, follower_list_view, \
     following_list_view, post_update_view, post_delete_view, comment_like_view, comment_delete_view, comment_edit_view, \
-    comment_reply_view, save_post_view, saved_post_list_view, friends_list_view, category_list_view
+    comment_reply_view, save_post_view, saved_post_list_view, friends_list_view, category_list_view, post_detail_view, \
+    news_feed_view, filter_by_category_view
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import views as auth_views
 from django.urls import path
@@ -14,6 +16,7 @@ urlpatterns = [
     path('', LoginView.as_view(), name='login'),
     path('create_post/', post_create_view, name='create_post'),
     path('post_list/', post_list_view, name='home'),
+    path('post/<int:pk>/', post_detail_view, name='post_detail'),
     path('post/<int:post_id>/comment/', comment_createView, name='create_comment'),
     path('post/<int:post_id>/not-interested/', not_interested_view, name='mark_not_interested'),
     path('post/<int:post_id>/like/', like_view, name='like_post'),
@@ -42,4 +45,8 @@ urlpatterns = [
     path('saved_posts/', saved_post_list_view, name='saved_posts'),
     path('friends/', friends_list_view, name='friends_list'),
     path('categories/', category_list_view, name='category_list'),
+    path('feed/', LatestPostsFeed(), name='rss_feed'),
+    path('post_detail/<int:pk>/', post_detail_view, name='post_detail'),
+    path('news_feed/',news_feed_view, name='news_feed'),
+    path('filter_by_category/', filter_by_category_view, name='filter_by_category'),
 ]

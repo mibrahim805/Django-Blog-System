@@ -9,6 +9,9 @@ consumers==0.6.1
 cryptography==46.0.5
 daphne==4.2.1
 Django==5.2.12
+django-debug-toolbar==4.3
+django-filter==24.1
+django-ckeditor==6.5.1
 hyperlink==21.0.0
 idna==3.11
 Incremental==24.11.0

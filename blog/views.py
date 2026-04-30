@@ -1,13 +1,21 @@
 from BlogSystem2 import settings
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
-from django .contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from .filters import PostFilter
 from .forms import RegistrationForm, PostCreateForm, CommentForm, InterestForm
 from .models import Post, Notification, Profile, CustomUser, NotInterestedPost, Like, Comment, Category, Follow, SavedPost
 from django.core.mail import send_mail
+from ckeditor_uploader.views import upload
+from django.contrib.auth.decorators import login_required
+
+
+
+@login_required
+def custom_upload(request):
+    return upload(request)
 
 
 def create_and_push_notification(*, user, post, sender, message):
@@ -65,7 +73,7 @@ def user_register_view(request):
         form = RegistrationForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect("blog:login")
+            return redirect("blog:home")
     else:
         form = RegistrationForm()
     return render(request, "registration/register.html", {"form": form})
@@ -156,12 +164,21 @@ def post_update_view(request, pk):
     return render(request, "post/post_create.html", {"form": form, "post": post})
 
 
+@login_required
+def post_detail_view(request, pk):
+    post = Post.objects.get(id=pk)
+    comments = Comment.objects.filter(post=post).select_related("user").order_by("created_at")
+    return render(request, "post/post_detail.html", {"post": post, "comments": comments})
+
+
+
 
 @login_required
 def post_delete_view(request, pk):
     post = Post.objects.get(id=pk)
     post.delete()
     return redirect("blog:my_posts")
+
 
 
 
@@ -313,7 +330,7 @@ def select_interest_view(request):
 
 @login_required
 def my_posts_view(request):
-    posts = Post.objects.filter(author=request.user, is_published=True).order_by("-created_at")
+    posts = Post.objects.filter(author=request.user).order_by("-created_at")
     return render(request, "post/my_posts.html", {"posts": posts})
 
 
@@ -425,4 +442,24 @@ def friends_list_view(request):
 def category_list_view(request):
     categories = Category.objects.order_by("name")
     return render(request, "category/category_list.html", {"categories": categories})
+
+
+
+
+@login_required
+def news_feed_view(request):
+    posts = Post.objects.filter(is_published=True, categories__name= "news").exclude(id__in=NotInterestedPost.objects.filter(user=request.user).values_list("post_id", flat=True)).order_by("-created_at")
+    return render(request, "post/post_list.html", {"posts": posts})
+
+
+
+def filter_by_category_view(request):
+    query = request.GET.get("q", "").strip()
+    posts = Post.objects.filter(is_published=True)
+    if query:
+        posts = posts.filter(categories__name__icontains=query)
+    posts = posts.order_by("-created_at")
+    return render(request, "post/post_list.html", {"posts": posts,"query": query})
+
+
 
