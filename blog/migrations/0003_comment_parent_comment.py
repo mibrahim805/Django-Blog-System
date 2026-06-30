@@ -7,13 +7,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('blog', '0002_alter_like_unique_together_like_comment_and_more'),
+        ("blog", "0002_alter_like_unique_together_like_comment_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='comment',
-            name='parent_comment',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='blog.comment'),
+            model_name="comment",
+            name="parent_comment",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="blog.comment",
+            ),
         ),
     ]

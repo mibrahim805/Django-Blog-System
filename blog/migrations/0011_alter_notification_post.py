@@ -7,13 +7,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('blog', '0010_profile_saved_posts_savedpost'),
+        ("blog", "0010_profile_saved_posts_savedpost"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='notification',
-            name='post',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='notifications', to='blog.post'),
+            model_name="notification",
+            name="post",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="notifications",
+                to="blog.post",
+            ),
         ),
     ]

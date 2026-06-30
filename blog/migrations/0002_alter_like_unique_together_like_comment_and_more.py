@@ -7,26 +7,36 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('blog', '0001_initial'),
+        ("blog", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterUniqueTogether(
-            name='like',
+            name="like",
             unique_together=set(),
         ),
         migrations.AddField(
-            model_name='like',
-            name='comment',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='blog.comment'),
+            model_name="like",
+            name="comment",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="blog.comment",
+            ),
         ),
         migrations.AlterField(
-            model_name='like',
-            name='post',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='blog.post'),
+            model_name="like",
+            name="post",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="blog.post",
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='like',
-            unique_together={('user', 'post', 'comment')},
+            name="like",
+            unique_together={("user", "post", "comment")},
         ),
     ]

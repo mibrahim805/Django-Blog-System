@@ -8,26 +8,48 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('blog', '0009_comment_is_approved'),
+        ("blog", "0009_comment_is_approved"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='profile',
-            name='saved_posts',
-            field=models.ManyToManyField(related_name='saved_posts', to='blog.post'),
+            model_name="profile",
+            name="saved_posts",
+            field=models.ManyToManyField(related_name="saved_posts", to="blog.post"),
         ),
         migrations.CreateModel(
-            name='SavedPost',
+            name="SavedPost",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('post', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='saved_by_users', to='blog.post')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='saved_posts', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "post",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="saved_by_users",
+                        to="blog.post",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="saved_posts",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
-                'unique_together': {('user', 'post')},
+                "ordering": ["-created_at"],
+                "unique_together": {("user", "post")},
             },
         ),
     ]

@@ -1,4 +1,5 @@
 from django.urls import re_path
+
 from blog.consumers import NotificationConsumer
 
 websocket_urlpatterns = [

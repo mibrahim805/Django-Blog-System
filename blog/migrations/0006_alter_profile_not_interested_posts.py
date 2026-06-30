@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('blog', '0005_profile_not_interested_posts'),
+        ("blog", "0005_profile_not_interested_posts"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='profile',
-            name='not_interested_posts',
-            field=models.ManyToManyField(related_name='user_not_interested_posts', to='blog.post'),
+            model_name="profile",
+            name="not_interested_posts",
+            field=models.ManyToManyField(
+                related_name="user_not_interested_posts", to="blog.post"
+            ),
         ),
     ]

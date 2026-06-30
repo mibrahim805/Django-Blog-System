@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-v3w37g0hc(4aqmk99duflx1$sjqn@=snjh3a66+xs3*-gc6mpx'
+SECRET_KEY = "django-insecure-v3w37g0hc(4aqmk99duflx1$sjqn@=snjh3a66+xs3*-gc6mpx"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -33,7 +33,7 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     ".ngrok-free.dev",
     "10.0.3.1/24 brd 10.0.3.255",
-    "*"
+    "*",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -43,48 +43,47 @@ CSRF_TRUSTED_ORIGINS = [
 # Application definition
 
 INSTALLED_APPS = [
-    'daphne',
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'django_filters',
-    'debug_toolbar',
-    'django.contrib.sitemaps',
-    'ckeditor',
-    'ckeditor_uploader',
-    'channels',
-    'blog',
+    "daphne",
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django_filters",
+    "debug_toolbar",
+    "django.contrib.sitemaps",
+    "ckeditor",
+    "ckeditor_uploader",
+    "channels",
+    "blog",
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
-ROOT_URLCONF = 'BlogSystem2.urls'
+ROOT_URLCONF = "BlogSystem2.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
-        ,
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-                'blog.context_processors.notifications_badge',
-                'blog.context_processors.navbar_context',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+                "blog.context_processors.notifications_badge",
+                "blog.context_processors.navbar_context",
             ],
         },
     },
@@ -98,9 +97,9 @@ ASGI_APPLICATION = "BlogSystem2.asgi.application"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
 
@@ -110,16 +109,16 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -127,24 +126,24 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
 USE_TZ = True
 
-AUTH_USER_MODEL = 'blog.CustomUser'
+AUTH_USER_MODEL = "blog.CustomUser"
 
 AUTHENTICATION_BACKENDS = [
-    'blog.backends.EmailOrUsernameBackend',
-    'django.contrib.auth.backends.ModelBackend',
+    "blog.backends.EmailOrUsernameBackend",
+    "django.contrib.auth.backends.ModelBackend",
 ]
 
-LOGIN_URL = 'blog:login'
-LOGIN_REDIRECT_URL = '/post_list/'
-LOGOUT_REDIRECT_URL = 'blog:login'
+LOGIN_URL = "blog:login"
+LOGIN_REDIRECT_URL = "/post_list/"
+LOGOUT_REDIRECT_URL = "blog:login"
 
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
@@ -156,8 +155,8 @@ EMAIL_HOST_USER = "mibrahimjutt1266@gmail.com"
 EMAIL_HOST_PASSWORD = "hydr ikxy fpfq hcvy"
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 CKEDITOR_ALLOW_NONIMAGE_FILES = False
 CKEDITOR_RESTRICT_BY_USER = False
 
@@ -165,7 +164,7 @@ CKEDITOR_UPLOAD_PATH = "uploads/"
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = "static/"
 # CKEDITOR_UPLOAD_SLUGIFY_FILENAME = True
 
 
@@ -177,16 +176,15 @@ INTERNAL_IPS = [
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CSRF_COOKIE_SECURE = False
-CSRF_COOKIE_SAMESITE = 'Lax'
-
+CSRF_COOKIE_SAMESITE = "Lax"
 
 
 CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "unique-snowflake",
     }
 }
 
@@ -202,8 +200,8 @@ CKEDITOR_BROWSE_SHOW_DIRS = True
 
 
 CKEDITOR_CONFIGS = {
-    'default': {
-        'filebrowserUploadUrl': '/ckeditor/upload/',
-        'filebrowserUploadMethod': 'form',
+    "default": {
+        "filebrowserUploadUrl": "/ckeditor/upload/",
+        "filebrowserUploadMethod": "form",
     }
 }

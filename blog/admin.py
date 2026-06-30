@@ -1,12 +1,13 @@
 from django.contrib import admin
 
-from blog.models import Post, Category, Profile, Like, Comment, CustomUser
+from blog.models import Category, Comment, CustomUser, Like, Post, Profile
 
 
 # Register your models here.
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
     list_display = ["username", "email", "is_staff", "is_active"]
+
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
@@ -16,6 +17,7 @@ class PostAdmin(admin.ModelAdmin):
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ["name"]
+
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
@@ -35,4 +37,4 @@ class CommentAdmin(admin.ModelAdmin):
 
 
 # admin.site.register(Like)
-# class 
+# class
