@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-v3w37g0hc(4aqmk99duflx1$sjqn@=snjh3a66+xs3*-gc6mpx"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 # Configure ASGI to use thread pool for sync operations (required for Daphne)
 ASGI_SYNC_CALLABLE_EXECUTOR = "threadpool"

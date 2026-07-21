@@ -1,0 +1,79 @@
+<script>
+(() => {
+    function readCookie(name) {
+        const prefix = `${name}=`;
+        for (const rawCookie of document.cookie.split(';')) {
+            const cookie = rawCookie.trim();
+            if (cookie.startsWith(prefix)) {
+                return decodeURIComponent(cookie.slice(prefix.length));
+            }
+        }
+        return null;
+    }
+
+    function csrfToken() {
+        const formToken = document.querySelector('[name="csrfmiddlewaretoken"]');
+        return readCookie('csrftoken') || (formToken ? formToken.value : '');
+    }
+
+    function renderLikeState(button, data) {
+        const liked = Boolean(data.is_liked);
+        const count = Number(data.like_count) || 0;
+        const commentId = button.dataset.commentId;
+        const icon = button.querySelector('i');
+        const label = button.querySelector('.comment-like-label');
+        const countBadge = document.getElementById(`comment-like-count-${commentId}`);
+
+        button.dataset.liked = liked ? 'true' : 'false';
+        button.classList.toggle('liked', liked);
+        button.setAttribute('aria-pressed', liked ? 'true' : 'false');
+        if (icon) {
+            icon.classList.toggle('fas', liked);
+            icon.classList.toggle('far', !liked);
+        }
+        if (label) {
+            label.textContent = liked ? 'Liked' : 'Like';
+        }
+        if (countBadge) {
+            const countValue = countBadge.querySelector('.comment-like-count-value');
+            if (countValue) countValue.textContent = String(count);
+            countBadge.classList.toggle('is-empty', count === 0);
+            countBadge.setAttribute('aria-label', `${count} ${count === 1 ? 'like' : 'likes'}`);
+        }
+    }
+
+    document.addEventListener('click', async (event) => {
+        const button = event.target.closest('.js-comment-like');
+        if (!button || button.disabled) return;
+
+        event.preventDefault();
+        button.disabled = true;
+        button.setAttribute('aria-busy', 'true');
+        button.classList.remove('has-error');
+
+        try {
+            const response = await fetch(button.dataset.url, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrfToken(),
+                },
+            });
+            const data = await response.json();
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || `Request failed with status ${response.status}`);
+            }
+            renderLikeState(button, data);
+        } catch (error) {
+            console.error('Unable to update comment like:', error);
+            button.classList.add('has-error');
+            button.title = 'Could not update this like. Please try again.';
+            window.setTimeout(() => button.classList.remove('has-error'), 1800);
+        } finally {
+            button.disabled = false;
+            button.removeAttribute('aria-busy');
+        }
+    });
+})();
+</script>

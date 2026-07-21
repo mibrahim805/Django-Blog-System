@@ -327,30 +327,69 @@
             color: var(--text-primary);
             line-height: 1.6;
             margin: 8px 0 12px 46px;
-            word-break: break-word;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
         }
 
         .comment-actions {
             display: flex;
-            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
             margin-left: 46px;
             font-size: 12px;
         }
 
         .comment-action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
             background: none;
             border: none;
+            border-radius: 14px;
             cursor: pointer;
             color: var(--text-secondary);
             font-weight: 600;
-            padding: 0;
-            transition: color 0.15s;
+            padding: 5px 9px;
+            transition: color 0.15s, background 0.15s, opacity 0.15s;
             text-decoration: none;
         }
 
         .comment-action-btn:hover {
             color: var(--primary-color);
+            background: #eef0ff;
         }
+
+        .comment-action-btn.liked {
+            color: var(--primary-color);
+            background: #eceefe;
+        }
+
+        .comment-action-btn:disabled {
+            cursor: wait;
+            opacity: 0.6;
+        }
+
+        .comment-action-btn.has-error {
+            color: var(--danger-color);
+            background: #fff1f1;
+        }
+
+        .comment-like-count {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            min-width: 28px;
+            height: 24px;
+            padding: 0 8px;
+            border-radius: 12px;
+            background: #eceefe;
+            color: var(--primary-color);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .comment-like-count.is-empty { display: none; }
 
         /* Empty State */
         .empty-comments {
@@ -484,12 +523,13 @@
             }
         }
     </style>
+    {% include "includes/comment_thread_styles.html" %}
 </head>
 <body>
 
 <div class="detail-container">
     <!-- Back Button -->
-    <a href="{% url 'blog:post_list' %}" class="back-btn">
+    <a href="{% url 'blog:home' %}" class="back-btn">
         <i class="fas fa-arrow-left"></i>
         Back to Posts
     </a>
@@ -542,7 +582,8 @@
                 </div>
                 <div class="post-meta-item">
                     <i class="fas fa-comments"></i>
-                    <strong>{{ comments.count }}</strong> {{ comments.count|pluralize:"Comment,Comments" }}
+                    <strong data-comment-count-value="{{ post.id }}">{{ comment_count }}</strong>
+                    {{ comment_count|pluralize:"Comment,Comments" }}
                 </div>
                 <div class="post-meta-item">
                     <i class="fas fa-eye"></i>
@@ -564,7 +605,7 @@
             </div>
             <div class="post-stat">
                 <i class="fas fa-comments"></i>
-                <span>{{ comments.count }} {{ comments.count|pluralize:"Comment,Comments" }}</span>
+                <span data-comment-count-label="{{ post.id }}">{{ comment_count }} comment{{ comment_count|pluralize }}</span>
             </div>
             <div class="post-stat">
                 <i class="fas fa-share"></i>
@@ -574,42 +615,15 @@
     </div>
 
     <!-- Comments Section -->
-    {% if comments %}
+    {% if comment_tree %}
     <div class="comments-section">
         <div class="comments-header">
             <h3>Comments</h3>
-            <span class="comments-count">{{ comments.count }}</span>
+            <span class="comments-count" data-comment-count-value="{{ post.id }}">{{ comment_count }}</span>
         </div>
-        <div class="comments-list">
-            {% for comment in comments %}
-            <div class="comment-item" id="comment-{{ comment.id }}">
-                <div class="comment-header">
-                    <div class="comment-avatar">
-                        {{ comment.user.username|first|upper }}
-                    </div>
-                    <div class="comment-author-info">
-                        <div class="comment-author">{{ comment.user.username }}</div>
-                        <div class="comment-time">{{ comment.created_at|date:"M d, Y - H:i" }}</div>
-                    </div>
-                </div>
-                <div class="comment-text">{{ comment.content }}</div>
-                <div class="comment-actions">
-                    <button class="comment-action-btn">
-                        <i class="far fa-heart"></i> {{ comment.get_like_count }}
-                    </button>
-                    {% if comment.user == request.user %}
-                    <a href="{% url 'blog:comment_update' comment.id %}" class="comment-action-btn">
-                        <i class="fas fa-edit"></i> Edit
-                    </a>
-                    <form method="post" action="{% url 'blog:comment_delete' comment.id %}" style="display: inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="comment-action-btn" onclick="return confirm('Delete this comment?')">
-                            <i class="fas fa-trash"></i> Delete
-                        </button>
-                    </form>
-                    {% endif %}
-                </div>
-            </div>
+        <div class="comments-list comment-thread-list">
+            {% for comment in comment_tree %}
+                {% include "comments/_thread_node.html" with comment=comment %}
             {% endfor %}
         </div>
     </div>
@@ -641,7 +655,7 @@
                     <i class="fas fa-paper-plane"></i>
                     Post Comment
                 </button>
-                <a href="{% url 'blog:post_list' %}" class="btn btn-secondary">
+                <a href="{% url 'blog:home' %}" class="btn btn-secondary">
                     <i class="fas fa-times"></i>
                     Cancel
                 </a>
@@ -660,6 +674,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% include "includes/comment_like_script.html" %}
+{% include "includes/comment_thread_script.html" %}
 </body>
 </html>
-

@@ -421,6 +421,7 @@
         }
     }
 </style>
+{% include "includes/comment_thread_styles.html" %}
 
 <div class="my-posts-container">
     <!-- Page Header -->
@@ -494,7 +495,10 @@
                 </div>
                 <div class="post-stat-item">
                     <i class="fas fa-comments"></i>
-                    <span><strong>{{ post.comments.count }}</strong> {{ post.comments.count|pluralize:"Comment,Comments" }}</span>
+                    <span>
+                        <strong data-comment-count-value="{{ post.id }}">{{ post.comment_count }}</strong>
+                        {{ post.comment_count|pluralize:"Comment,Comments" }}
+                    </span>
                 </div>
             </div>
 
@@ -519,29 +523,29 @@
             </div>
 
             <!-- Comments Section -->
-            {% if post.comments.all %}
-                <button type="button" class="comments-toggle-btn" onclick="toggleComments({{ post.id }})" id="toggle-btn-{{ post.id }}">
+            {% if post.comment_tree %}
+                <button
+                    type="button"
+                    class="comments-toggle-btn"
+                    id="toggle-btn-{{ post.id }}"
+                    data-comment-toggle="{{ post.id }}"
+                    data-comment-count="{{ post.comment_count }}"
+                    aria-expanded="false"
+                    onclick="toggleComments({{ post.id }})"
+                >
                     <i class="fas fa-chevron-down"></i>
-                    <span>Show Comments ({{ post.comments.count }})</span>
+                    <span class="comments-toggle-label">Show Comments ({{ post.comment_count }})</span>
                 </button>
 
                 <div class="comments-section" id="comments-section-{{ post.id }}">
                     <div class="comments-title">
                         <i class="fas fa-comments"></i> Recent Comments
                     </div>
-                    {% for comment in post.comments.all|slice:":3" %}
-                        <div class="comment-item">
-                            <div class="comment-avatar">
-                                {{ comment.user.username|first|upper }}
-                            </div>
-                            <div class="comment-bubble">
-                                <div class="comment-bubble-inner">
-                                    <div class="comment-author">{{ comment.user.username }}</div>
-                                    <p class="comment-text">{{ comment.content }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
+                    <div class="comment-thread-list">
+                        {% for comment in post.comment_tree %}
+                            {% include "comments/_thread_node.html" with comment=comment %}
+                        {% endfor %}
+                    </div>
                 </div>
             {% endif %}
         </div>
@@ -564,12 +568,17 @@
             const icon = btn.querySelector('i');
             if (section.classList.contains('show')) {
                 icon.className = 'fas fa-chevron-up';
-                btn.querySelector('span').textContent = 'Hide Comments';
+                btn.setAttribute('aria-expanded', 'true');
+                btn.querySelector('.comments-toggle-label').textContent = 'Hide Comments';
             } else {
                 icon.className = 'fas fa-chevron-down';
-                btn.querySelector('span').textContent = 'Show Comments (' + section.querySelectorAll('.comment-item').length + ')';
+                btn.setAttribute('aria-expanded', 'false');
+                btn.querySelector('.comments-toggle-label').textContent =
+                    'Show Comments (' + btn.dataset.commentCount + ')';
             }
         }
     }
 </script>
+{% include "includes/comment_like_script.html" %}
+{% include "includes/comment_thread_script.html" %}
 {% endblock %}

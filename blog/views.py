@@ -5,6 +5,9 @@ from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.decorators.http import require_POST
 
 from BlogSystem2 import settings
 
@@ -102,6 +105,46 @@ def build_profile_context(profile_user, current_user=None):
     }
 
 
+def build_comment_tree(comments):
+    """Attach ordered children to each comment and return only root comments."""
+    comment_list = list(comments)
+    comments_by_id = {comment.id: comment for comment in comment_list}
+    roots = []
+
+    for comment in comment_list:
+        comment.display_replies = []
+
+    for comment in comment_list:
+        parent = comments_by_id.get(comment.parent_comment_id)
+        if parent is not None and parent.post_id == comment.post_id:
+            parent.display_replies.append(comment)
+        else:
+            roots.append(comment)
+
+    return roots
+
+
+def prepare_posts_with_comment_trees(posts):
+    """Materialize posts and attach their full comment trees without N+1 queries."""
+    post_list = list(posts)
+    comments_by_post = {post.id: [] for post in post_list}
+    comments = (
+        Comment.objects.filter(post_id__in=comments_by_post)
+        .select_related("user")
+        .order_by("created_at", "id")
+    )
+
+    for comment in comments:
+        comments_by_post[comment.post_id].append(comment)
+
+    for post in post_list:
+        post_comments = comments_by_post[post.id]
+        post.comment_count = len(post_comments)
+        post.comment_tree = build_comment_tree(post_comments)
+
+    return post_list
+
+
 def user_register_view(request):
     if request.method == "POST":
         form = RegistrationForm(request.POST)
@@ -124,7 +167,7 @@ def post_list_view(request):
         .order_by("-created_at")
     )
     filter = PostFilter(request.GET, queryset=queryset)
-    posts = filter.qs
+    posts = prepare_posts_with_comment_trees(filter.qs)
 
     all_categories = Category.objects.order_by("name")
     selected_category_ids = []
@@ -139,7 +182,7 @@ def post_list_view(request):
         user=request.user, comment__isnull=True
     ).values_list("post_id", flat=True)
     liked_comments = Like.objects.filter(
-        user=request.user, post__isnull=True
+        user=request.user, post__isnull=True, comment__isnull=False
     ).values_list("comment_id", flat=True)
     saved_posts = SavedPost.objects.filter(user=request.user).values_list(
         "post_id", flat=True
@@ -229,11 +272,25 @@ def post_update_view(request, pk):
 @login_required
 def post_detail_view(request, pk):
     post = Post.objects.get(id=pk)
-    comments = (
+    comments = list(
         Comment.objects.filter(post=post).select_related("user").order_by("created_at")
     )
+    comment_tree = build_comment_tree(comments)
+    liked_comment_ids = Like.objects.filter(
+        user=request.user,
+        post__isnull=True,
+        comment__post=post,
+    ).values_list("comment_id", flat=True)
     return render(
-        request, "post/post_detail.html", {"post": post, "comments": comments}
+        request,
+        "post/post_detail.html",
+        {
+            "post": post,
+            "comments": comments,
+            "comment_tree": comment_tree,
+            "comment_count": len(comments),
+            "liked_comment_ids": list(liked_comment_ids),
+        },
     )
 
 
@@ -288,83 +345,138 @@ def comment_edit_view(request, comment_id):
 
 
 @login_required
+@require_POST
 def comment_delete_view(request, comment_id):
-    if request.method == "POST":
-        comment = get_object_or_404(Comment, id=comment_id, user=request.user)
-        post_id = comment.post.id
-        comment.delete()
-        if request.headers.get(
-            "X-Requested-With"
-        ) == "XMLHttpRequest" or request.post.get("ajax"):
-            return JsonResponse({"success": True, "post_id": post_id})
-        return redirect("blog:home")
+    is_ajax = request.headers.get(
+        "X-Requested-With"
+    ) == "XMLHttpRequest" or request.POST.get("ajax")
+    comment = get_object_or_404(Comment, id=comment_id, user=request.user)
+    post_id = comment.post_id
+    deleted_comment_id = comment.id
+    comment.delete()
 
+    if is_ajax:
+        return JsonResponse(
+            {
+                "success": True,
+                "comment_id": deleted_comment_id,
+                "post_id": post_id,
+                "post_comment_count": Comment.objects.filter(post_id=post_id).count(),
+            }
+        )
 
-@login_required
-def comment_like_view(request, comment_id):
-    comment = get_object_or_404(Comment, id=comment_id)
-    like = Like.objects.filter(user=request.user, comment=comment)
-    is_liked = False
-    if like:
-        like.delete()
-    else:
-        Like.objects.create(user=request.user, comment=comment)
-        is_liked = True
-        if comment.post.author != request.user:
-            create_and_push_notification(
-                user=comment.post.author,
-                post=comment.post,
-                sender=request.user,
-                message=f"{request.user.username} liked your comment.",
-            )
-
-    if request.headers.get("X-Requested-With") == "XMLHttpRequest" or request.POST.get(
-        "ajax"
+    next_url = request.POST.get("next")
+    if next_url and url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
     ):
-        return JsonResponse({"success": True, "is_liked": is_liked})
+        return redirect(next_url)
     return redirect("blog:home")
 
 
 @login_required
-def comment_reply_view(request, comment_id):
-    parent_comment = get_object_or_404(Comment, id=comment_id)
-    if request.method == "POST":
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            comment = form.save(commit=False)
-            comment.user = request.user
-            comment.post = parent_comment.post
-            comment.parent = parent_comment
-            comment.save()
-            if parent_comment.user != request.user:
-                create_and_push_notification(
-                    user=parent_comment.user,
-                    post=parent_comment.post,
-                    sender=request.user,
-                    message=f"{request.user.username} replied to your comment.",
-                )
-            if request.headers.get(
-                "X-Requested-With"
-            ) == "XMLHttpRequest" or request.POST.get("ajax"):
-                return JsonResponse(
-                    {
-                        "success": True,
-                        "comment_id": comment.id,
-                        "message": "Reply posted successfully",
-                    }
-                )
-            return redirect("blog:home")
+@require_POST
+def comment_like_view(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    like, created = Like.objects.get_or_create(
+        user=request.user,
+        comment=comment,
+        defaults={"post": None},
+    )
+    if created:
+        is_liked = True
+        if comment.user != request.user:
+            create_and_push_notification(
+                user=comment.user,
+                post=comment.post,
+                sender=request.user,
+                message=f"{request.user.username} liked your comment.",
+            )
+    else:
+        like.delete()
+        is_liked = False
+
+    like_count = Like.objects.filter(
+        comment=comment,
+        post__isnull=True,
+    ).count()
+
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest" or request.POST.get(
+        "ajax"
+    ):
+        return JsonResponse(
+            {
+                "success": True,
+                "is_liked": is_liked,
+                "like_count": like_count,
+            }
+        )
+    return redirect("blog:home")
 
 
 @login_required
+@require_POST
+def comment_reply_view(request, comment_id):
+    parent_comment = get_object_or_404(Comment, id=comment_id)
+    form = CommentForm(request.POST)
+    is_ajax = request.headers.get(
+        "X-Requested-With"
+    ) == "XMLHttpRequest" or request.POST.get("ajax")
+
+    if not form.is_valid():
+        if is_ajax:
+            return JsonResponse(
+                {"success": False, "errors": form.errors.get_json_data()}, status=400
+            )
+        return redirect("blog:post_detail", pk=parent_comment.post_id)
+
+    comment = form.save(commit=False)
+    comment.user = request.user
+    comment.post = parent_comment.post
+    comment.parent_comment = parent_comment
+    comment.save()
+
+    if parent_comment.user != request.user:
+        create_and_push_notification(
+            user=parent_comment.user,
+            post=parent_comment.post,
+            sender=request.user,
+            message=f"{request.user.username} replied to your comment.",
+        )
+
+    if is_ajax:
+        comment.display_replies = []
+        html = render_to_string(
+            "comments/_thread_node.html",
+            {"comment": comment, "liked_comment_ids": []},
+            request=request,
+        )
+        return JsonResponse(
+            {
+                "success": True,
+                "comment_id": comment.id,
+                "parent_id": parent_comment.id,
+                "post_id": parent_comment.post_id,
+                "reply_count": parent_comment.replies.count(),
+                "post_comment_count": parent_comment.post.comments.count(),
+                "html": html,
+                "message": "Reply posted successfully",
+            }
+        )
+    return redirect("blog:post_detail", pk=parent_comment.post_id)
+
+
+@login_required
+@require_POST
 def like_view(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    like = Like.objects.filter(user=request.user, post=post, comment__isnull=True)
-    is_liked = False
-    if like:
-        like.delete()
-    else:
-        Like.objects.create(user=request.user, post=post)
+    like, created = Like.objects.get_or_create(
+        user=request.user,
+        post=post,
+        comment=None,
+    )
+    if created:
         is_liked = True
         if post.author != request.user:
             create_and_push_notification(
@@ -373,11 +485,22 @@ def like_view(request, post_id):
                 sender=request.user,
                 message=f"{request.user.username} liked your post.",
             )
+    else:
+        like.delete()
+        is_liked = False
+
+    like_count = Like.objects.filter(post=post, comment__isnull=True).count()
 
     if request.headers.get("X-Requested-With") == "XMLHttpRequest" or request.POST.get(
         "ajax"
     ):
-        return JsonResponse({"success": True, "is_liked": is_liked})
+        return JsonResponse(
+            {
+                "success": True,
+                "is_liked": is_liked,
+                "like_count": like_count,
+            }
+        )
     return redirect("blog:home")
 
 
@@ -435,8 +558,19 @@ def select_interest_view(request):
 
 @login_required
 def my_posts_view(request):
-    posts = Post.objects.filter(author=request.user).order_by("-created_at")
-    return render(request, "post/my_posts.html", {"posts": posts})
+    posts = prepare_posts_with_comment_trees(
+        Post.objects.filter(author=request.user).order_by("-created_at")
+    )
+    liked_comment_ids = Like.objects.filter(
+        user=request.user,
+        post__isnull=True,
+        comment__post__in=posts,
+    ).values_list("comment_id", flat=True)
+    return render(
+        request,
+        "post/my_posts.html",
+        {"posts": posts, "liked_comment_ids": list(liked_comment_ids)},
+    )
 
 
 @login_required
@@ -558,7 +692,7 @@ def category_list_view(request):
 
 @login_required
 def news_feed_view(request):
-    posts = (
+    posts = prepare_posts_with_comment_trees(
         Post.objects.filter(is_published=True, categories__name="news")
         .exclude(
             id__in=NotInterestedPost.objects.filter(user=request.user).values_list(
@@ -567,7 +701,14 @@ def news_feed_view(request):
         )
         .order_by("-created_at")
     )
-    return render(request, "post/post_list.html", {"posts": posts})
+    liked_comment_ids = Like.objects.filter(
+        user=request.user, post__isnull=True, comment__isnull=False
+    ).values_list("comment_id", flat=True)
+    return render(
+        request,
+        "post/post_list.html",
+        {"posts": posts, "liked_comment_ids": list(liked_comment_ids)},
+    )
 
 
 def filter_by_category_view(request):
@@ -575,5 +716,16 @@ def filter_by_category_view(request):
     posts = Post.objects.filter(is_published=True)
     if query:
         posts = posts.filter(categories__name__icontains=query)
-    posts = posts.order_by("-created_at")
-    return render(request, "post/post_list.html", {"posts": posts, "query": query})
+    posts = prepare_posts_with_comment_trees(posts.order_by("-created_at"))
+    liked_comment_ids = []
+    if request.user.is_authenticated:
+        liked_comment_ids = list(
+            Like.objects.filter(
+                user=request.user, post__isnull=True, comment__isnull=False
+            ).values_list("comment_id", flat=True)
+        )
+    return render(
+        request,
+        "post/post_list.html",
+        {"posts": posts, "query": query, "liked_comment_ids": liked_comment_ids},
+    )

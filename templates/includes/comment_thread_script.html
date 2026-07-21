@@ -1,0 +1,142 @@
+<script>
+(() => {
+    function readCookie(name) {
+        const prefix = `${name}=`;
+        for (const rawCookie of document.cookie.split(';')) {
+            const cookie = rawCookie.trim();
+            if (cookie.startsWith(prefix)) {
+                return decodeURIComponent(cookie.slice(prefix.length));
+            }
+        }
+        return null;
+    }
+
+    function csrfToken(form) {
+        const formToken = form.querySelector('[name="csrfmiddlewaretoken"]');
+        return readCookie('csrftoken') || (formToken ? formToken.value : '');
+    }
+
+    function replyLabel(count, expanded) {
+        const noun = count === 1 ? 'reply' : 'replies';
+        return `${expanded ? 'Hide' : 'View'} ${count} ${noun}`;
+    }
+
+    function updateReplyToggle(button, count, expanded) {
+        const label = button.querySelector('.reply-toggle-label');
+        const icon = button.querySelector('i');
+        button.dataset.replyCount = String(count);
+        button.classList.toggle('is-empty', count === 0);
+        button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        if (label) label.textContent = replyLabel(count, expanded);
+        if (icon) icon.className = expanded ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
+    }
+
+    function updatePostCommentCount(postId, count) {
+        document.querySelectorAll(`[data-comment-count-value="${postId}"]`).forEach((node) => {
+            node.textContent = String(count);
+        });
+        document.querySelectorAll(`[data-comment-count-label="${postId}"]`).forEach((node) => {
+            node.textContent = `${count} comment${count === 1 ? '' : 's'}`;
+        });
+        document.querySelectorAll(`[data-comment-toggle="${postId}"]`).forEach((button) => {
+            button.dataset.commentCount = String(count);
+            const label = button.querySelector('.comments-toggle-label');
+            if (!label) return;
+            const expanded = button.getAttribute('aria-expanded') === 'true';
+            label.textContent = expanded ? 'Hide Comments' : `Show Comments (${count})`;
+        });
+    }
+
+    document.addEventListener('click', (event) => {
+        const repliesButton = event.target.closest('.js-toggle-replies');
+        if (repliesButton) {
+            const commentId = repliesButton.dataset.commentId;
+            const container = document.getElementById(`comment-replies-${commentId}`);
+            if (!container) return;
+            const expanded = container.hidden;
+            container.hidden = !expanded;
+            updateReplyToggle(
+                repliesButton,
+                Number(repliesButton.dataset.replyCount) || 0,
+                expanded,
+            );
+            return;
+        }
+
+        const replyButton = event.target.closest('.js-reply-toggle');
+        if (replyButton) {
+            const commentId = replyButton.dataset.commentId;
+            const editor = document.getElementById(`comment-reply-editor-${commentId}`);
+            if (!editor) return;
+            const expanded = editor.hidden;
+            editor.hidden = !expanded;
+            replyButton.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+            if (expanded) editor.querySelector('textarea')?.focus();
+        }
+    });
+
+    document.addEventListener('submit', async (event) => {
+        const form = event.target.closest('.js-comment-reply-form');
+        if (!form) return;
+
+        event.preventDefault();
+        const parentId = form.dataset.parentId;
+        const editor = document.getElementById(`comment-reply-editor-${parentId}`);
+        const status = editor?.querySelector('.comment-thread-reply-status');
+        const submitButton = form.querySelector('[type="submit"]');
+        const textarea = form.querySelector('textarea[name="content"]');
+        if (!textarea || !textarea.value.trim()) return;
+
+        submitButton.disabled = true;
+        if (status) {
+            status.textContent = 'Posting reply…';
+            status.classList.remove('error');
+        }
+
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrfToken(form),
+                },
+                body: new FormData(form),
+            });
+            const data = await response.json();
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Unable to post reply');
+            }
+
+            const repliesContainer = document.getElementById(`comment-replies-${parentId}`);
+            const repliesToggle = document.getElementById(`comment-replies-toggle-${parentId}`);
+            if (repliesContainer) {
+                repliesContainer.insertAdjacentHTML('beforeend', data.html);
+                repliesContainer.hidden = false;
+                const newReply = document.getElementById(`comment-${data.comment_id}`);
+                newReply?.classList.add('new-reply');
+            }
+            if (repliesToggle) {
+                updateReplyToggle(repliesToggle, Number(data.reply_count) || 0, true);
+            }
+
+            updatePostCommentCount(data.post_id, data.post_comment_count);
+            form.reset();
+            if (editor) editor.hidden = true;
+            const replyButton = document.querySelector(
+                `.js-reply-toggle[data-comment-id="${parentId}"]`,
+            );
+            replyButton?.setAttribute('aria-expanded', 'false');
+            if (status) status.textContent = '';
+        } catch (error) {
+            console.error('Unable to post reply:', error);
+            if (status) {
+                status.textContent = 'Reply could not be posted. Please try again.';
+                status.classList.add('error');
+            }
+        } finally {
+            submitButton.disabled = false;
+        }
+    });
+})();
+</script>

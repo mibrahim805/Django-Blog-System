@@ -1,0 +1,206 @@
+[1mdiff --git a/blog/__pycache__/urls.cpython-310.pyc b/blog/__pycache__/urls.cpython-310.pyc[m
+[1mindex 05c43e97..37ef8e3f 100644[m
+Binary files a/blog/__pycache__/urls.cpython-310.pyc and b/blog/__pycache__/urls.cpython-310.pyc differ
+[1mdiff --git a/blog/__pycache__/views.cpython-310.pyc b/blog/__pycache__/views.cpython-310.pyc[m
+[1mindex 50a0bfac..343e9e1d 100644[m
+Binary files a/blog/__pycache__/views.cpython-310.pyc and b/blog/__pycache__/views.cpython-310.pyc differ
+[1mdiff --git a/venv/bin/automat-visualize b/venv/bin/automat-visualize[m
+[1mindex 8cb2d21a..4328b5c9 100755[m
+[1m--- a/venv/bin/automat-visualize[m
+[1m+++ b/venv/bin/automat-visualize[m
+[36m@@ -3,6 +3,7 @@[m
+ import re[m
+ import sys[m
+ from automat._visualize import tool[m
+[31m-if __name__ == '__main__':[m
+[31m-    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])[m
+[32m+[m
+[32m+[m[32mif __name__ == "__main__":[m
+[32m+[m[32m    sys.argv[0] = re.sub(r"(-script\.pyw|\.exe)?$", "", sys.argv[0])[m
+     sys.exit(tool())[m
+[1mdiff --git a/venv/bin/cftp b/venv/bin/cftp[m
+[1mindex c5d1cc39..ee77a83f 100755[m
+[1m--- a/venv/bin/cftp[m
+[1m+++ b/venv/bin/cftp[m
+[36m@@ -3,6 +3,7 @@[m
+ import re[m
+ import sys[m
+ from twisted.conch.scripts.cftp import run[m
+[31m-if __name__ == '__main__':[m
+[31m-    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])[m
+[32m+[m
+[32m+[m[32mif __name__ == "__main__":[m
+[32m+[m[32m    sys.argv[0] = re.sub(r"(-script\.pyw|\.exe)?$", "", sys.argv[0])[m
+     sys.exit(run())[m
+[1mdiff --git a/venv/bin/ckeygen b/venv/bin/ckeygen[m
+[1mindex 81ed3301..3a6f335b 100755[m
+[1m--- a/venv/bin/ckeygen[m
+[1m+++ b/venv/bin/ckeygen[m
+[36m@@ -3,6 +3,7 @@[m
+ import re[m
+ import sys[m
+ from twisted.conch.scripts.ckeygen import run[m
+[31m-if __name__ == '__main__':[m
+[31m-    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])[m
+[32m+[m
+[32m+[m[32mif __name__ == "__main__":[m
+[32m+[m[32m    sys.argv[0] = re.sub(r"(-script\.pyw|\.exe)?$", "", sys.argv[0])[m
+     sys.exit(run())[m
+[1mdiff --git a/venv/bin/conch b/venv/bin/conch[m
+[1mindex 478bb0e9..73546876 100755[m
+[1m--- a/venv/bin/conch[m
+[1m+++ b/venv/bin/conch[m
+[36m@@ -3,6 +3,7 @@[m
+ import re[m
+ import sys[m
+ from twisted.conch.scripts.conch import run[m
+[31m-if __name__ == '__main__':[m
+[31m-    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])[m
+[32m+[m
+[32m+[m[32mif __name__ == "__main__":[m
+[32m+[m[32m    sys.argv[0] = re.sub(r"(-script\.pyw|\.exe)?$", "", sys.argv[0])[m
+     sys.exit(run())[m
+[1mdiff --git a/venv/bin/daphne b/venv/bin/daphne[m
+[1mindex 9533fa4b..28be0018 100755[m
+[1m--- a/venv/bin/daphne[m
+[1m+++ b/venv/bin/daphne[m
+[36m@@ -3,6 +3,7 @@[m
+ import re[m
+ import sys[m
+ from daphne.cli import CommandLineInterface[m
+[31m-if __name__ == '__main__':[m
+[31m-    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])[m
+[32m+[m
+[32m+[m[32mif __name__ == "__main__":[m
+[32m+[m[32m    sys.argv[0] = re.sub(r"(-script\.pyw|\.exe)?$", "", sys.argv[0])[m
+     sys.exit(CommandLineInterface.entrypoint())[m
+[1mdiff --git a/venv/bin/django-admin b/venv/bin/django-admin[m
+[1mindex 003d286f..2bdf07ea 100755[m
+[1m--- a/venv/bin/django-admin[m
+[1m+++ b/venv/bin/django-admin[m
+[36m@@ -3,6 +3,7 @@[m
+ import re[m
+ import sys[m
+ from django.core.management import execute_from_command_line[m
+[31m-if __name__ == '__main__':[m
+[31m-    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])[m
+[32m+[m
+[32m+[m[32mif __name__ == "__main__":[m
+[32m+[m[32m    sys.argv[0] = re.sub(r"(-script\.pyw|\.exe)?$", "", sys.argv[0])[m
+     sys.exit(execute_from_command_line())[m
+[1mdiff --git a/venv/bin/incremental b/venv/bin/incremental[m
+[1mindex 9de6e91d..e3fa2914 100755[m
+[1m--- a/venv/bin/incremental[m
+[1m+++ b/venv/bin/incremental[m
+[36m@@ -3,6 +3,7 @@[m
+ import re[m
+ import sys[m
+ from incremental.update import _main[m
+[31m-if __name__ == '__main__':[m
+[31m-    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])[m
+[32m+[m
+[32m+[m[32mif __name__ == "__main__":[m
+[32m+[m[32m    sys.argv[0] = re.sub(r"(-script\.pyw|\.exe)?$", "", sys.argv[0])[m
+     sys.exit(_main())[m
+[1mdiff --git a/venv/bin/mailmail b/venv/bin/mailmail[m
+[1mindex 21dd5d02..e8f3364e 100755[m
+[1m--- a/venv/bin/mailmail[m
+[1m+++ b/venv/bin/mailmail[m
+[36m@@ -3,6 +3,7 @@[m
+ import re[m
+ import sys[m
+ from twisted.mail.scripts.mailmail import run[m
+[31m-if __name__ == '__main__':[m
+[31m-    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])[m
+[32m+[m
+[32m+[m[32mif __name__ == "__main__":[m
+[32m+[m[32m    sys.argv[0] = re.sub(r"(-script\.pyw|\.exe)?$", "", sys.argv[0])[m
+     sys.exit(run())[m
+[1mdiff --git a/venv/bin/pyhtmlizer b/venv/bin/pyhtmlizer[m
+[1mindex f51e32a8..f82c09bb 100755[m
+[1m--- a/venv/bin/pyhtmlizer[m
+[1m+++ b/venv/bin/pyhtmlizer[m
+[36m@@ -3,6 +3,7 @@[m
+ import re[m
+ import sys[m
+ from twisted.scripts.htmlizer import run[m
+[31m-if __name__ == '__main__':[m
+[31m-    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])[m
+[32m+[m
+[32m+[m[32mif __name__ == "__main__":[m
+[32m+[m[32m    sys.argv[0] = re.sub(r"(-script\.pyw|\.exe)?$", "", sys.argv[0])[m
+     sys.exit(run())[m
+[1mdiff --git a/venv/bin/sqlformat b/venv/bin/sqlformat[m
+[1mindex 389021d0..b198de4b 100755[m
+[1m--- a/venv/bin/sqlformat[m
+[1m+++ b/venv/bin/sqlformat[m
+[36m@@ -3,6 +3,7 @@[m
+ import re[m
+ import sys[m
+ from sqlparse.__main__ import main[m
+[31m-if __name__ == '__main__':[m
+[31m-    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])[m
+[32m+[m
+[32m+[m[32mif __name__ == "__main__":[m
+[32m+[m[32m    sys.argv[0] = re.sub(r"(-script\.pyw|\.exe)?$", "", sys.argv[0])[m
+     sys.exit(main())[m
+[1mdiff --git a/venv/bin/tkconch b/venv/bin/tkconch[m
+[1mindex 24bba41f..2dec093d 100755[m
+[1m--- a/venv/bin/tkconch[m
+[1m+++ b/venv/bin/tkconch[m
+[36m@@ -3,6 +3,7 @@[m
+ import re[m
+ import sys[m
+ from twisted.conch.scripts.tkconch import run[m
+[31m-if __name__ == '__main__':[m
+[31m-    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])[m
+[32m+[m
+[32m+[m[32mif __name__ == "__main__":[m
+[32m+[m[32m    sys.argv[0] = re.sub(r"(-script\.pyw|\.exe)?$", "", sys.argv[0])[m
+     sys.exit(run())[m
+[1mdiff --git a/venv/bin/trial b/venv/bin/trial[m
+[1mindex ea536749..cc8648e7 100755[m
+[1m--- a/venv/bin/trial[m
+[1m+++ b/venv/bin/trial[m
+[36m@@ -3,6 +3,7 @@[m
+ import re[m
+ import sys[m
+ from twisted.scripts.trial import run[m
+[31m-if __name__ == '__main__':[m
+[31m-    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])[m
+[32m+[m
+[32m+[m[32mif __name__ == "__main__":[m
+[32m+[m[32m    sys.argv[0] = re.sub(r"(-script\.pyw|\.exe)?$", "", sys.argv[0])[m
+     sys.exit(run())[m
+[1mdiff --git a/venv/bin/twist b/venv/bin/twist[m
+[1mindex 01d7dcf4..e95404b2 100755[m
+[1m--- a/venv/bin/twist[m
+[1m+++ b/venv/bin/twist[m
+[36m@@ -3,6 +3,7 @@[m
+ import re[m
+ import sys[m
+ from twisted.application.twist._twist import Twist[m
+[31m-if __name__ == '__main__':[m
+[31m-    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])[m
+[32m+[m
+[32m+[m[32mif __name__ == "__main__":[m
+[32m+[m[32m    sys.argv[0] = re.sub(r"(-script\.pyw|\.exe)?$", "", sys.argv[0])[m
+     sys.exit(Twist.main())[m
+[1mdiff --git a/venv/bin/twistd b/venv/bin/twistd[m
+[1mindex 364e842a..27445060 100755[m
+[1m--- a/venv/bin/twistd[m
+[1m+++ b/venv/bin/twistd[m
+[36m@@ -3,6 +3,7 @@[m
+ import re[m
+ import sys[m
+ from twisted.scripts.twistd import run[m
+[31m-if __name__ == '__main__':[m
+[31m-    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])[m
+[32m+[m
+[32m+[m[32mif __name__ == "__main__":[m
+[32m+[m[32m    sys.argv[0] = re.sub(r"(-script\.pyw|\.exe)?$", "", sys.argv[0])[m
+     sys.exit(run())[m
+[1mdiff --git a/venv/bin/wamp b/venv/bin/wamp[m
+[1mindex e8e2ddf6..7b0e4605 100755[m
+[1m--- a/venv/bin/wamp[m
+[1m++

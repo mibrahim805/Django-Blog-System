@@ -1,0 +1,130 @@
+{% with replies=comment.display_replies %}
+<article class="comment-thread-node" id="comment-{{ comment.id }}" data-comment-id="{{ comment.id }}">
+    <div class="comment-thread-row">
+        <div class="comment-thread-avatar" aria-hidden="true">
+            {{ comment.user.username|first|upper }}
+        </div>
+        <div class="comment-thread-main">
+            <div class="comment-thread-bubble">
+                <div class="comment-thread-author">
+                    {{ comment.user.get_full_name|default:comment.user.username }}
+                </div>
+                <div class="comment-thread-text">{{ comment.content }}</div>
+            </div>
+
+            <div class="comment-thread-actions">
+                <span class="comment-thread-time">{{ comment.created_at|timesince }} ago</span>
+
+                {% if request.user.is_authenticated %}
+                <button
+                    type="button"
+                    class="comment-thread-action js-comment-like {% if comment.id in liked_comment_ids %}liked{% endif %}"
+                    id="comment-like-{{ comment.id }}"
+                    data-comment-id="{{ comment.id }}"
+                    data-url="{% url 'blog:comment_like' comment.id %}"
+                    data-liked="{% if comment.id in liked_comment_ids %}true{% else %}false{% endif %}"
+                    aria-pressed="{% if comment.id in liked_comment_ids %}true{% else %}false{% endif %}"
+                    aria-label="Like comment by {{ comment.user.username }}"
+                >
+                    <i class="{% if comment.id in liked_comment_ids %}fas{% else %}far{% endif %} fa-thumbs-up" aria-hidden="true"></i>
+                    <span class="comment-like-label">{% if comment.id in liked_comment_ids %}Liked{% else %}Like{% endif %}</span>
+                </button>
+                {% endif %}
+
+                {% with like_count=comment.get_like_count %}
+                <span
+                    class="comment-like-count{% if not like_count %} is-empty{% endif %}"
+                    id="comment-like-count-{{ comment.id }}"
+                    aria-live="polite"
+                    aria-label="{{ like_count }} likes"
+                >
+                    <i class="fas fa-thumbs-up" aria-hidden="true"></i>
+                    <span class="comment-like-count-value">{{ like_count }}</span>
+                </span>
+                {% endwith %}
+
+                <button
+                    type="button"
+                    class="comment-thread-action js-toggle-replies{% if not replies %} is-empty{% endif %}"
+                    id="comment-replies-toggle-{{ comment.id }}"
+                    data-comment-id="{{ comment.id }}"
+                    data-reply-count="{{ replies|length }}"
+                    aria-expanded="false"
+                    aria-controls="comment-replies-{{ comment.id }}"
+                >
+                    <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                    <span class="reply-toggle-label">View {{ replies|length }} repl{{ replies|length|pluralize:"y,ies" }}</span>
+                </button>
+
+                {% if request.user.is_authenticated %}
+                <button
+                    type="button"
+                    class="comment-thread-action js-reply-toggle"
+                    data-comment-id="{{ comment.id }}"
+                    aria-expanded="false"
+                    aria-controls="comment-reply-editor-{{ comment.id }}"
+                >
+                    <i class="far fa-comment-dots" aria-hidden="true"></i>
+                    Reply
+                </button>
+                {% endif %}
+
+                {% if comment.user == request.user %}
+                <a class="comment-thread-action" href="{% url 'blog:comment_update' comment.id %}">
+                    <i class="fas fa-pen" aria-hidden="true"></i>
+                    Edit
+                </a>
+                <form
+                    class="comment-thread-delete-form"
+                    method="post"
+                    action="{% url 'blog:comment_delete' comment.id %}"
+                >
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <button
+                        type="submit"
+                        class="comment-thread-action danger"
+                        onclick="return confirm('Delete this comment and all of its replies?')"
+                    >
+                        <i class="fas fa-trash" aria-hidden="true"></i>
+                        Delete
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+
+            {% if request.user.is_authenticated %}
+            <div class="comment-thread-reply-editor" id="comment-reply-editor-{{ comment.id }}" hidden>
+                <form
+                    class="comment-thread-reply-form js-comment-reply-form"
+                    action="{% url 'blog:comment_reply' comment.id %}"
+                    method="post"
+                    data-parent-id="{{ comment.id }}"
+                >
+                    {% csrf_token %}
+                    <textarea
+                        class="comment-thread-reply-input"
+                        name="content"
+                        rows="1"
+                        maxlength="2000"
+                        placeholder="Reply to {{ comment.user.username }}…"
+                        aria-label="Reply to {{ comment.user.username }}"
+                        required
+                    ></textarea>
+                    <button class="comment-thread-reply-submit" type="submit" aria-label="Post reply">
+                        <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                    </button>
+                </form>
+                <span class="comment-thread-reply-status" aria-live="polite"></span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="comment-thread-children" id="comment-replies-{{ comment.id }}" hidden>
+        {% for reply in replies %}
+            {% include "comments/_thread_node.html" with comment=reply %}
+        {% endfor %}
+    </div>
+</article>
+{% endwith %}

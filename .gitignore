@@ -1,1 +1,6 @@
 project_explanation.txt
+__pycache__/
+*.py[cod]
+*.class
+venv/
+.venv/

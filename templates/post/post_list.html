@@ -644,6 +644,8 @@
         gap: 4px;
     }
 
+    .reaction-icons.is-empty { visibility: hidden; }
+
     .reaction-bubble {
         width: 20px;
         height: 20px;
@@ -672,12 +674,44 @@
     .reaction-count:hover { text-decoration: underline; }
 
     .comment-count-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 7px;
+        border: 0;
+        border-radius: 14px;
+        background: transparent;
         cursor: pointer;
         color: var(--text-secondary);
+        font-family: inherit;
         font-size: 14px;
+        transition: color 0.15s, background 0.15s;
     }
 
-    .comment-count-link:hover { text-decoration: underline; }
+    .comment-count-link:hover {
+        background: var(--action-hover);
+        color: var(--text-primary);
+    }
+
+    .comment-count-link[aria-expanded="true"] {
+        background: #eceefe;
+        color: var(--primary-color);
+    }
+
+    .comment-count-link i {
+        font-size: 11px;
+        transition: transform 0.18s ease;
+    }
+
+    .comment-count-link[aria-expanded="true"] i {
+        transform: rotate(180deg);
+    }
+
+    .comment-count-link:disabled {
+        background: transparent;
+        color: var(--text-tertiary);
+        cursor: default;
+    }
 
     /* Action buttons row */
     .post-actions {
@@ -711,17 +745,46 @@
 
     .post-action-btn.liked {
         color: var(--primary-color);
+        background: #eceefe;
     }
+
+    .post-action-btn:disabled { cursor: wait; opacity: 0.6; }
+    .post-action-btn.has-error { color: var(--danger-color); background: #fff1f1; }
 
     .post-action-btn i { font-size: 18px; }
 
     /* Comments section */
     .comments-section {
-        padding: 10px 16px;
+        padding: 12px 16px 16px;
         display: none;
+        background: linear-gradient(180deg, #fbfcff 0%, #ffffff 100%);
+        border-top: 1px solid var(--border-color);
     }
 
     .comments-section.show { display: block; }
+
+    .comments-section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        color: var(--text-primary);
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .comments-section-header span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 24px;
+        height: 24px;
+        padding: 0 7px;
+        border-radius: 12px;
+        background: #eceefe;
+        color: var(--primary-color);
+        font-size: 11px;
+    }
 
     /* Comment composer */
     .comment-composer {
@@ -804,16 +867,19 @@
     /* Comment item */
     .comment-item {
         display: flex;
-        gap: 8px;
-        margin-bottom: 12px;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 14px;
         animation: fadeIn 0.2s ease;
     }
+
+    .comment-item:last-child { margin-bottom: 0; }
 
     @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
     .comment-avatar {
-        width: 32px;
-        height: 32px;
+        width: 34px;
+        height: 34px;
         border-radius: 50%;
         background: var(--primary-gradient);
         display: flex;
@@ -823,18 +889,22 @@
         font-weight: 700;
         font-size: 13px;
         flex-shrink: 0;
+        box-shadow: 0 2px 7px rgba(102, 126, 234, 0.22);
     }
 
     .comment-bubble {
         flex: 1;
+        min-width: 0;
     }
 
     .comment-bubble-inner {
         background: var(--light-bg);
-        border-radius: 16px;
-        padding: 8px 12px;
+        border: 1px solid #e7e9f2;
+        border-radius: 16px 16px 16px 5px;
+        padding: 9px 13px;
         display: inline-block;
-        max-width: 100%;
+        max-width: min(100%, 560px);
+        box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
     }
 
     .comment-author-name {
@@ -848,41 +918,77 @@
         font-size: 14px;
         line-height: 1.5;
         color: var(--text-primary);
-        word-break: break-word;
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
     }
 
     .comment-footer {
         display: flex;
         align-items: center;
-        gap: 12px;
-        margin-top: 4px;
-        padding: 0 4px;
+        flex-wrap: wrap;
+        gap: 3px;
+        margin-top: 5px;
+        padding-left: 4px;
     }
 
     .comment-footer-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
         font-size: 12px;
         font-weight: 700;
         color: var(--text-secondary);
         background: none;
         border: none;
+        border-radius: 12px;
         cursor: pointer;
-        padding: 0;
-        transition: color 0.15s;
+        padding: 3px 7px;
+        transition: color 0.15s, background 0.15s, opacity 0.15s;
         text-decoration: none;
     }
 
-    .comment-footer-btn:hover { color: var(--text-primary); }
-    .comment-footer-btn.liked { color: var(--primary-color); }
+    .comment-footer-btn:hover {
+        color: var(--text-primary);
+        background: #eef0f5;
+    }
+
+    .comment-footer-btn.liked {
+        color: var(--primary-color);
+        background: #eceefe;
+    }
+
+    .comment-footer-btn:disabled {
+        cursor: wait;
+        opacity: 0.6;
+    }
+
+    .comment-footer-btn.has-error {
+        color: var(--danger-color);
+        background: #fff1f1;
+    }
 
     .comment-time {
         font-size: 12px;
         color: var(--text-tertiary);
+        margin-right: 3px;
     }
 
     .comment-like-count {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        min-width: 26px;
+        height: 22px;
+        padding: 0 7px;
+        border-radius: 11px;
+        background: #eceefe;
         font-size: 12px;
-        color: var(--text-secondary);
+        color: var(--primary-color);
+        font-weight: 700;
+        transition: opacity 0.15s;
     }
+
+    .comment-like-count.is-empty { display: none; }
 
     /* Reply form inline */
     .reply-form-wrapper {
@@ -1203,6 +1309,7 @@
         .stories-row { display: none; }
     }
 </style>
+{% include "includes/comment_thread_styles.html" %}
 
 <!-- TOP NAV -->
 <nav class="fb-nav">
@@ -1332,6 +1439,7 @@
 
         <!-- Posts -->
         {% for post in posts %}
+        {% with comment_list=post.comment_tree %}
         <div class="post-card" id="post-card-{{ post.id }}">
 
             <!-- Header -->
@@ -1430,27 +1538,53 @@
             </div>
 
             <!-- Reaction summary -->
+            {% with post_like_count=post.get_like_count %}
             <div class="post-reaction-summary">
-                <div class="reaction-icons">
-                    {% if post.get_like_count > 0 %}
+                <div class="reaction-icons{% if not post_like_count %} is-empty{% endif %}" id="post-like-summary-{{ post.id }}">
                     <div class="reaction-bubble like"><i class="fas fa-thumbs-up" style="font-size:9px;"></i></div>
-                    <span class="reaction-count">{{ post.get_like_count }}</span>
-                    {% endif %}
+                    <span class="reaction-count" id="post-like-count-{{ post.id }}">{{ post_like_count }}</span>
                 </div>
                 <div>
-                    <span class="comment-count-link" onclick="toggleComments({{ post.id }})">
-                        {{ post.approved_comments.count }} comment{{ post.approved_comments.count|pluralize }}
-                    </span>
+                    <button
+                        type="button"
+                        class="comment-count-link"
+                        id="comments-toggle-{{ post.id }}"
+                        aria-expanded="false"
+                        aria-controls="comments-section-{{ post.id }}"
+                        onclick="toggleComments({{ post.id }})"
+                        {% if not comment_list %}disabled{% endif %}
+                    >
+                        <span data-comment-count-label="{{ post.id }}">
+                            {{ post.comment_count }} comment{{ post.comment_count|pluralize }}
+                        </span>
+                        {% if comment_list %}<i class="fas fa-chevron-down" aria-hidden="true"></i>{% endif %}
+                    </button>
                 </div>
             </div>
+            {% endwith %}
 
             <!-- Action buttons -->
             <div class="post-actions">
-                <button type="button" class="post-action-btn {% if post.id in liked_post_ids %}liked{% endif %}" onclick="handlePostLike(event, {{ post.id }})" id="like-btn-{{ post.id }}" data-liked="{% if post.id in liked_post_ids %}true{% else %}false{% endif %}">
+                <button
+                    type="button"
+                    class="post-action-btn js-post-like {% if post.id in liked_post_ids %}liked{% endif %}"
+                    id="like-btn-{{ post.id }}"
+                    data-post-id="{{ post.id }}"
+                    data-url="{% url 'blog:like_post' post.id %}"
+                    data-liked="{% if post.id in liked_post_ids %}true{% else %}false{% endif %}"
+                    aria-pressed="{% if post.id in liked_post_ids %}true{% else %}false{% endif %}"
+                >
                     <i class="{% if post.id in liked_post_ids %}fas{% else %}far{% endif %} fa-thumbs-up"></i>
-                    <span>Like</span>
+                    <span class="post-like-label">{% if post.id in liked_post_ids %}Liked{% else %}Like{% endif %}</span>
                 </button>
-                <button type="button" class="post-action-btn" onclick="toggleCommentComposer({{ post.id }})">
+                <button
+                    type="button"
+                    class="post-action-btn"
+                    id="comment-composer-toggle-{{ post.id }}"
+                    aria-expanded="false"
+                    aria-controls="comment-composer-{{ post.id }}"
+                    onclick="toggleCommentComposer({{ post.id }})"
+                >
                     <i class="far fa-comment"></i>
                     <span>Comment</span>
                 </button>
@@ -1461,43 +1595,17 @@
             </div>
 
             <!-- Comments Section -->
-            {% if post.approved_comments.exists %}
+            {% if comment_list %}
             <div class="comments-section" id="comments-section-{{ post.id }}">
-                {% for comment in post.approved_comments.all %}
-                <div class="comment-item" id="comment-{{ comment.id }}">
-                    <div class="comment-avatar">{{ comment.user.username|first|upper }}</div>
-                    <div class="comment-bubble">
-                        <div class="comment-bubble-inner">
-                            <div class="comment-author-name">{{ comment.user.get_full_name|default:comment.user.username }}</div>
-                            <div class="comment-text">{{ comment.content }}</div>
-                        </div>
-                        <div class="comment-footer">
-                            <span class="comment-time">{{ comment.created_at|timesince }} ago</span>
-                            <button type="button" class="comment-footer-btn {% if comment.id in liked_comment_ids %}liked{% endif %}" onclick="handleCommentLike(event, {{ comment.id }})" id="comment-like-{{ comment.id }}" data-liked="{% if comment.id in liked_comment_ids %}true{% else %}false{% endif %}">Like</button>
-                            <button class="comment-footer-btn" onclick="toggleReplyForm({{ comment.id }})">Reply</button>
-                            {% if comment.user == request.user %}
-                            <button class="comment-footer-btn" onclick="openEditModal({{ comment.id }}, `{{ comment.content|escapejs }}`)">Edit</button>
-                            <button class="comment-footer-btn" onclick="openDeleteModal({{ comment.id }})" style="color:var(--danger-color);">Delete</button>
-                            {% endif %}
-                            {% if comment.get_like_count > 0 %}
-                            <span class="comment-like-count"><i class="fas fa-thumbs-up" style="color:var(--primary-color);font-size:11px;"></i> {{ comment.get_like_count }}</span>
-                            {% endif %}
-                        </div>
-
-                        <!-- Reply Form -->
-                        <div id="reply-form-{{ comment.id }}" class="reply-form-wrapper">
-                            <div class="comment-avatar" style="width:28px;height:28px;font-size:11px;flex-shrink:0;">{{ request.user.username|first|upper }}</div>
-                            <form style="flex:1;" onsubmit="handleReplySubmit(event, {{ comment.id }})">
-                                {% csrf_token %}
-                                <div class="reply-input-wrapper">
-                                    <textarea class="reply-textarea" placeholder="Write a reply..." rows="1" required></textarea>
-                                    <button type="submit" style="background:none;border:none;cursor:pointer;color:var(--primary-color);font-size:14px;"><i class="fas fa-paper-plane"></i></button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+                <div class="comments-section-header">
+                    <div><i class="far fa-comments"></i> Conversation</div>
+                    <span data-comment-count-value="{{ post.id }}">{{ post.comment_count }}</span>
                 </div>
-                {% endfor %}
+                <div class="comment-thread-list">
+                    {% for comment in comment_list %}
+                        {% include "comments/_thread_node.html" with comment=comment %}
+                    {% endfor %}
+                </div>
             </div>
             {% endif %}
 
@@ -1517,6 +1625,7 @@
             </div>
 
         </div>
+        {% endwith %}
         {% empty %}
         <div class="empty-state">
             <div class="empty-state-icon">📝</div>
@@ -1747,21 +1856,23 @@
 
     function toggleComments(postId) {
         const section = document.getElementById('comments-section-' + postId);
-        if (section) section.classList.toggle('show');
+        const button = document.getElementById('comments-toggle-' + postId);
+        if (!section || !button) return;
+        const isExpanded = section.classList.toggle('show');
+        button.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
     }
 
     function toggleCommentComposer(postId) {
         const composer = document.getElementById('comment-composer-' + postId);
+        const button = document.getElementById('comment-composer-toggle-' + postId);
         if (!composer) return;
         const isShown = composer.classList.contains('show');
         composer.classList.toggle('show');
+        if (button) button.setAttribute('aria-expanded', isShown ? 'false' : 'true');
         if (!isShown) {
             const ta = composer.querySelector('textarea');
             if (ta) ta.focus();
         }
-        // Also show comments when composing
-        const section = document.getElementById('comments-section-' + postId);
-        if (section && !section.classList.contains('show')) section.classList.add('show');
     }
 
     function toggleSeeMore(postId) {
@@ -1804,131 +1915,12 @@
         .catch(err => { console.error(err); alert('Error posting comment'); });
     }
 
-    function handlePostLike(e, postId) {
-        e.preventDefault();
-        const btn = document.getElementById('like-btn-' + postId);
-        fetch("{% url 'blog:like_post' 0 %}".replace('0', postId), {
-            method: 'POST',
-            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value },
-            body: new FormData(),
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                const liked = data.is_liked;
-                btn.setAttribute('data-liked', liked ? 'true' : 'false');
-                btn.classList.toggle('liked', liked);
-                const icon = btn.querySelector('i');
-                if (icon) icon.className = liked ? 'fas fa-thumbs-up' : 'far fa-thumbs-up';
-                setTimeout(() => location.reload(), 300);
-            }
-        })
-        .catch(err => console.error(err));
-    }
-
-    function handleCommentLike(e, commentId) {
-        e.preventDefault();
-        const btn = document.getElementById('comment-like-' + commentId);
-        fetch("{% url 'blog:comment_like' 0 %}".replace('0', commentId), {
-            method: 'POST',
-            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value },
-            body: new FormData(),
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                btn.classList.toggle('liked', data.is_liked);
-                setTimeout(() => location.reload(), 300);
-            }
-        })
-        .catch(err => console.error(err));
-    }
-
-    function toggleReplyForm(commentId) {
-        const form = document.getElementById('reply-form-' + commentId);
-        if (!form) return;
-        form.classList.toggle('show');
-        if (form.classList.contains('show')) {
-            const ta = form.querySelector('textarea');
-            if (ta) ta.focus();
-        }
-    }
-
-    function handleReplySubmit(e, commentId) {
-        e.preventDefault();
-        const form = e.target;
-        const textarea = form.querySelector('textarea');
-        const content = textarea.value.trim();
-        if (!content) return;
-
-        const formData = new FormData();
-        formData.append('content', content);
-
-        fetch("{% url 'blog:comment_reply' 0 %}".replace('0', commentId), {
-            method: 'POST',
-            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value },
-            body: formData,
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) { textarea.value = ''; setTimeout(() => location.reload(), 300); }
-            else alert('Error posting reply');
-        })
-        .catch(err => { console.error(err); alert('Error posting reply'); });
-    }
-
     document.getElementById('editModal').addEventListener('hidden.bs.modal', () => document.getElementById('editForm').reset());
 </script>
-    
-{% block extra_js %}
-<script>
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
-function handlePostLike(event, postId) {
-    event.preventDefault();
-
-    fetch(`/post/${postId}/like/`, {
-        method: "POST",
-        headers: {
-            "X-Requested-With": "XMLHttpRequest",
-            "X-CSRFToken": getCookie("csrftoken"),
-            "Content-Type": "application/json"
-        }
-    })
-    .then(res => res.json())
-    .then(data => {
-        let btn = document.getElementById(`like-btn-${postId}`);
-        let icon = btn.querySelector("i");
-
-        if (data.is_liked) {
-            icon.classList.remove("far");
-            icon.classList.add("fas");
-        } else {
-            icon.classList.remove("fas");
-            icon.classList.add("far");
-        }
-    })
-    .catch(err => console.log(err));
-}
-
-</script>
-{% endblock %}
-    
+{% include "includes/comment_like_script.html" %}
+{% include "includes/comment_thread_script.html" %}
+{% include "includes/post_like_script.html" %}
 {% endblock %}
 
 </body>
 </html>
-

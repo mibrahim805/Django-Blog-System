@@ -28,12 +28,8 @@ class Post(models.Model):
         return self.like_set.filter(comment__isnull=True).count()
 
     @property
-    def approved_comments(self):
-        return (
-            self.comments.filter(is_approved=True)
-            .select_related("user")
-            .order_by("created_at")
-        )
+    def display_comments(self):
+        return self.comments.select_related("user").order_by("created_at")
 
 
 class Comment(models.Model):
@@ -43,8 +39,15 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     is_approved = models.BooleanField(default=False)
     parent_comment = models.ForeignKey(
-        "self", on_delete=models.CASCADE, null=True, blank=True
+        "self",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="replies",
     )
+
+    class Meta:
+        ordering = ["created_at", "id"]
 
     def __str__(self):
         return self.content
@@ -62,7 +65,25 @@ class Like(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ("user", "post", "comment")
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    models.Q(post__isnull=False, comment__isnull=True)
+                    | models.Q(post__isnull=True, comment__isnull=False)
+                ),
+                name="blog_like_one_target",
+            ),
+            models.UniqueConstraint(
+                fields=["user", "post"],
+                condition=models.Q(post__isnull=False, comment__isnull=True),
+                name="unique_user_post_like",
+            ),
+            models.UniqueConstraint(
+                fields=["user", "comment"],
+                condition=models.Q(post__isnull=True, comment__isnull=False),
+                name="unique_user_comment_like",
+            ),
+        ]
 
     def __str__(self):
         return str(self.user)
